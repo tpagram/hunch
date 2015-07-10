@@ -1,5 +1,5 @@
 #ifndef FORMULA_H
-#define FORMULA_H value
+#define FORMULA_H
 
 class Formula
 {
@@ -7,11 +7,13 @@ class Formula
 
 public:
 	Formula(Formula*, Formula*, Operator);
+	Formula();
 
 private:
 	Formula* left;
 	Formula* right;
 	Operator op;
-};	int variable;
+	int variable;
+};	
 
 #endif

@@ -1,7 +1,15 @@
-#include <iostream>
+#include "hunch.h"
 
-int main(int argc, char const *argv[])
-{
-	std::cout << "hello world" << std::endl;
-	return 0;
+using namespace std;
+
+int main(int argc, char const *argv[]) {
+
+	string input;
+	getline(cin,input);
+
+	Parser parser;
+	Formula* mainFormula = parser.parse(input);
+
+	
+
 }

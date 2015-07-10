@@ -1,3 +1,9 @@
 #ifndef HUNCH_H
-#define HUNCH_H value
+
+#include <iostream>
+#include "parser.h"
+#include "formula.h"
+
+
+#define HUNCH_H
 #endif
