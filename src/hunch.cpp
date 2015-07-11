@@ -9,7 +9,7 @@ int main(int argc, char const *argv[]) {
 
 	Parser parser;
 	Formula* mainFormula = parser.parse(input);
-
+	delete(mainFormula);
 	
 
 }

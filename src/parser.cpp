@@ -3,26 +3,25 @@
 using namespace std;
 
 /*
-Creates a Formula corresponding to the input string.
+Creates a Formula corresponding to an input string.
 */
 Formula* Parser::parse(string input) {
-	vector<string> *tokens = tokenise(input);
-	//Formula* mainFormula = new Formula();
-	//return mainFormula;
+	queue<string> *tokens = tokenise(input);
+	return parseEquality(tokens);
 }
 
 /*
 Splits a string into tokens of ),(,~,&,|,=>,<=>,[0-9a-z]+.
 */
-vector<string>* Parser::tokenise(string input) {
-	vector<string>* tokens = new vector<string>();
-	for (int i = 0; i < input.size(); ++i) {
+queue<string>* Parser::tokenise(string input) {
+	queue<string>* tokens = new queue<string>();
+	for (int i = 0; i < input.size(); i++) {
 		if(isspace(input.at(i))) continue;
-		if (input.at(i) == '(') tokens->push_back("(");
-		else if (input.at(i) == ')') tokens->push_back(")");
-		else if (input.at(i) == '&') tokens->push_back("&");
-		else if (input.at(i) == '|') tokens->push_back("|");
-		else if (input.at(i) == '~') tokens->push_back("~");
+		if (input.at(i) == '(') tokens->push("(");
+		else if (input.at(i) == ')') tokens->push(")");
+		else if (input.at(i) == '&') tokens->push("&");
+		else if (input.at(i) == '|') tokens->push("|");
+		else if (input.at(i) == '~') tokens->push("~");
 		else if (isalnum(input.at(i))) {
 			string atom = string(1,input.at(i));
 			for (int j = i + 1; j < input.size(); ++j) {
@@ -32,11 +31,11 @@ vector<string>* Parser::tokenise(string input) {
 				}
 				else break;
 			}
-			tokens->push_back(atom);
+			tokens->push(atom);
 		}
 		else if (input.at(i) == '=') {
 			if (i + 1 < input.size() && input.at(i + 1) == '>') {
-				tokens->push_back("=>");
+				tokens->push("=>");
 				i = i + 1;
 			}
 			else {
@@ -46,7 +45,7 @@ vector<string>* Parser::tokenise(string input) {
 		} 
 		else if (input.at(i) == '<') {
 			if (i + 2 < input.size() && input.at(i + 1) == '=' && input.at(i + 2) == '>') {
-				tokens->push_back("<=>");
+				tokens->push("<=>");
 				i = i + 2;
 			}
 			else {
@@ -61,3 +60,81 @@ vector<string>* Parser::tokenise(string input) {
 	}
 	return tokens;
 }
+
+	Formula* Parser::parseEquality(queue<string>* tokens) {
+		Formula* left = parseImplication(tokens);
+		if (!tokens->empty() && tokens->front() == "<=>") {
+			tokens->pop();
+			Formula* right = parseEquality(tokens);
+			return new Formula(left, right, Operator::EQUAL);
+		}
+		else return left;
+	}
+
+	Formula* Parser::parseImplication(queue<string>* tokens) {
+		Formula* left = parseDisjunction(tokens);
+		if (!tokens->empty() && tokens->front() == "=>") {
+			tokens->pop();
+			Formula* right = parseImplication(tokens);
+			return new Formula(left, right, Operator::IMPLIES);
+		}
+		else return left;
+	}
+
+	Formula* Parser::parseDisjunction(queue<string>* tokens) {
+		Formula* left = parseConjunction(tokens);
+		if (!tokens->empty() && tokens->front() == "|") {
+			tokens->pop();
+			Formula* right = parseDisjunction(tokens);
+			return new Formula(left, right, Operator::OR);
+		}
+		else return left;
+	}
+
+	Formula* Parser::parseConjunction(queue<string>* tokens) {
+		Formula* left = parseTerm(tokens);
+		if (!tokens->empty() && tokens->front() == "&") {
+			tokens->pop();
+			Formula* right = parseConjunction(tokens);
+			return new Formula(left, right, Operator::AND);
+		}
+		else return left;
+	}
+
+	Formula* Parser::parseTerm(queue<std::string>* tokens) {
+		if (tokens->empty()) {
+			cerr << "ERROR: parser finds empty term. \n";
+			exit(1);
+		}
+		else if (tokens->front() == "true") {
+			Formula* formula = new Formula(Operator::TRUE);
+			tokens->pop();
+			return formula;
+		}
+		else if (tokens->front() == "false") {
+			Formula* formula = new Formula(Operator::FALSE);
+			tokens->pop();
+			return formula;
+		}
+		else if (isalnum(tokens->front()[0])) {
+			Formula* formula = new Formula(tokens->front());
+			tokens->pop();
+			return formula;
+		}
+		else if (tokens->front() == "(") {
+			tokens->pop();
+			Formula* formula = parseEquality(tokens);
+			if (tokens->front() == ")") {
+				tokens->pop();
+				return formula;
+			}
+			else {
+				cerr << "ERROR: parser detected no closing bracket ')'\n";
+				exit(1);
+			}
+		}
+		else {
+			cerr << "ERROR: parser detected unexpected symbol: " << tokens->front() << endl;
+			exit(1);
+		}
+	}

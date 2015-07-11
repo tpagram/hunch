@@ -2,7 +2,7 @@
 #define PARSER_H
 
 #include <iostream>
-#include <vector>
+#include <queue>
 #include <string>
 #include "formula.h"
 
@@ -13,7 +13,14 @@ public:
 	virtual Formula* parse(std::string);
 
 private:
-	virtual std::vector<std::string>* tokenise(std::string);
+	virtual std::queue<std::string>* tokenise(std::string);
+	Formula* parseEquality(std::queue<std::string>*);
+	Formula* parseImplication(std::queue<std::string>*);
+	Formula* parseDisjunction(std::queue<std::string>*);
+	Formula* parseConjunction(std::queue<std::string>*);
+	Formula* parseNegation(std::queue<std::string>*);
+	Formula* parseTerm(std::queue<std::string>*);
+
 
 };
 
