@@ -3,8 +3,9 @@
 
 #include <string>
 #include <iostream>
+#include <map>
 
-enum class Operator { FALSE, TRUE, ATOM, AND, OR, IMPLIES, EQUAL };
+enum class Operator { FALSE, TRUE, ATOM, EQUAL, IMPLIES, OR, AND };
 
 class Formula
 {
@@ -21,6 +22,8 @@ private:
 	Formula* right;
 	Operator op;
 	std::string var;
+	std::string toString(int priority);
+	int operatorPriority(Operator);
 };	
 
 #endif

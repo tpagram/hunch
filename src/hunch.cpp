@@ -9,6 +9,7 @@ int main(int argc, char const *argv[]) {
 
 	Parser parser;
 	Formula* mainFormula = parser.parse(input);
+	cout << mainFormula->toString() << endl;
 	delete(mainFormula);
 	
 
