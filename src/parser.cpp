@@ -3,7 +3,8 @@
 using namespace std;
 
 /*
-Creates a Formula corresponding to an input string.
+Creates a Formula parsing an input string.
+Uses a recursive descent parser.
 */
 Formula* Parser::parse(string input) {
 	queue<string> *tokens = tokenise(input);
@@ -61,80 +62,90 @@ queue<string>* Parser::tokenise(string input) {
 	return tokens;
 }
 
-	Formula* Parser::parseEquality(queue<string>* tokens) {
-		Formula* left = parseImplication(tokens);
-		if (!tokens->empty() && tokens->front() == "<=>") {
-			tokens->pop();
-			Formula* right = parseEquality(tokens);
-			return new Formula(left, right, Operator::EQUAL);
-		}
-		else return left;
+Formula* Parser::parseEquality(queue<string>* tokens) {
+	Formula* left = parseImplication(tokens);
+	if (!tokens->empty() && tokens->front() == "<=>") {
+		tokens->pop();
+		Formula* right = parseEquality(tokens);
+		return new Formula(left, right, Operator::EQUAL);
 	}
+	else return left;
+}
 
-	Formula* Parser::parseImplication(queue<string>* tokens) {
-		Formula* left = parseDisjunction(tokens);
-		if (!tokens->empty() && tokens->front() == "=>") {
-			tokens->pop();
-			Formula* right = parseImplication(tokens);
-			return new Formula(left, right, Operator::IMPLIES);
-		}
-		else return left;
+Formula* Parser::parseImplication(queue<string>* tokens) {
+	Formula* left = parseDisjunction(tokens);
+	if (!tokens->empty() && tokens->front() == "=>") {
+		tokens->pop();
+		Formula* right = parseImplication(tokens);
+		return new Formula(left, right, Operator::IMPLIES);
 	}
+	else return left;
+}
 
-	Formula* Parser::parseDisjunction(queue<string>* tokens) {
-		Formula* left = parseConjunction(tokens);
-		if (!tokens->empty() && tokens->front() == "|") {
-			tokens->pop();
-			Formula* right = parseDisjunction(tokens);
-			return new Formula(left, right, Operator::OR);
-		}
-		else return left;
+Formula* Parser::parseDisjunction(queue<string>* tokens) {
+	Formula* left = parseConjunction(tokens);
+	if (!tokens->empty() && tokens->front() == "|") {
+		tokens->pop();
+		Formula* right = parseDisjunction(tokens);
+		return new Formula(left, right, Operator::OR);
 	}
+	else return left;
+}
 
-	Formula* Parser::parseConjunction(queue<string>* tokens) {
+Formula* Parser::parseConjunction(queue<string>* tokens) {
+	Formula* left = parseNegation(tokens);
+	if (!tokens->empty() && tokens->front() == "&") {
+		tokens->pop();
+		Formula* right = parseConjunction(tokens);
+		return new Formula(left, right, Operator::AND);
+	}
+	else return left;
+}
+
+Formula* Parser::parseNegation(queue<string>* tokens) {
+	if (!tokens->empty() && tokens->front() == "~") {
+		tokens->pop();
 		Formula* left = parseTerm(tokens);
-		if (!tokens->empty() && tokens->front() == "&") {
-			tokens->pop();
-			Formula* right = parseConjunction(tokens);
-			return new Formula(left, right, Operator::AND);
-		}
-		else return left;
+		Formula* right = new Formula(Operator::FALSE);
+		return new Formula(left, right, Operator::IMPLIES);
 	}
+	else return parseTerm(tokens);
+}
 
-	Formula* Parser::parseTerm(queue<std::string>* tokens) {
-		if (tokens->empty()) {
-			cerr << "ERROR: parser finds empty term. \n";
-			exit(1);
-		}
-		else if (tokens->front() == "true") {
-			Formula* formula = new Formula(Operator::TRUE);
+Formula* Parser::parseTerm(queue<std::string>* tokens) {
+	if (tokens->empty()) {
+		cerr << "ERROR: parser finds empty term. \n";
+		exit(1);
+	}
+	else if (tokens->front() == "true") {
+		Formula* formula = new Formula(Operator::TRUE);
+		tokens->pop();
+		return formula;
+	}
+	else if (tokens->front() == "false") {
+		Formula* formula = new Formula(Operator::FALSE);
+		tokens->pop();
+		return formula;
+	}
+	else if (isalnum(tokens->front()[0])) {
+		Formula* formula = new Formula(tokens->front());
+		tokens->pop();
+		return formula;
+	}
+	else if (tokens->front() == "(") {
+		tokens->pop();
+		Formula* formula = parseEquality(tokens);
+		if (tokens->front() == ")") {
 			tokens->pop();
 			return formula;
-		}
-		else if (tokens->front() == "false") {
-			Formula* formula = new Formula(Operator::FALSE);
-			tokens->pop();
-			return formula;
-		}
-		else if (isalnum(tokens->front()[0])) {
-			Formula* formula = new Formula(tokens->front());
-			tokens->pop();
-			return formula;
-		}
-		else if (tokens->front() == "(") {
-			tokens->pop();
-			Formula* formula = parseEquality(tokens);
-			if (tokens->front() == ")") {
-				tokens->pop();
-				return formula;
-			}
-			else {
-				cerr << "ERROR: parser detected no closing bracket ')'\n";
-				exit(1);
-			}
 		}
 		else {
-			cerr << "ERROR: parser detected unexpected symbol: " << tokens->front() << endl;
+			cerr << "ERROR: parser detected no closing bracket ')'\n";
 			exit(1);
 		}
 	}
+	else {
+		cerr << "ERROR: parser detected unexpected symbol: " << tokens->front() << endl;
+		exit(1);
+	}
+}

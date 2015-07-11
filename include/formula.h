@@ -3,7 +3,6 @@
 
 #include <string>
 #include <iostream>
-#include <map>
 
 enum class Operator { FALSE, TRUE, ATOM, EQUAL, IMPLIES, OR, AND };
 
@@ -23,7 +22,6 @@ private:
 	Operator op;
 	std::string var;
 	std::string toString(int priority);
-	int operatorPriority(Operator);
 };	
 
 #endif

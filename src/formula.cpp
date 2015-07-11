@@ -54,7 +54,7 @@ Converts the formula to a readable string.
 string Formula::toString(int priority) {
 	bool needBrackets = false;
 	string str = "";
-	if (priority > (int) op && (int) op > 2) {
+	if (priority >= (int) op && (int) op > 2) {
 		needBrackets = true;
 		str += "( ";
 	}
@@ -66,7 +66,7 @@ string Formula::toString(int priority) {
 	else if (op == Operator::IMPLIES) str += left->toString(4) + " => "  + right->toString(4);
 	else if (op == Operator::EQUAL) str += left->toString(3) + " <=> "  + right->toString(3);
 	else {
-		std::cerr << "ERROR: formula to string encounters invalid operator.\n";
+		cerr << "ERROR: formula to string encounters invalid operator.\n";
 		exit(1);
 	}
 	if (needBrackets) str += " )";
