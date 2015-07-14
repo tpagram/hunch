@@ -15,6 +15,10 @@ public:
 	Formula(Operator);
 	~Formula();
 	std::string toString();
+	Operator getOp();
+	Formula* getLeft();
+	Formula* getRight();
+	bool isEqual(Formula*);
 
 private:
 	Formula* left;

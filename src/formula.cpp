@@ -72,3 +72,42 @@ string Formula::toString(int priority) {
 	if (needBrackets) str += " )";
 	return str;
 }
+
+/*
+Return operator variable.
+ */
+Operator Formula::getOp() {
+	return op;
+}
+
+/*
+Return left subtree.
+ */
+Formula* Formula::getLeft() {
+	return left;
+}
+
+/*
+Return right subtree.
+ */
+Formula* Formula::getRight() {
+	return right;
+}
+
+/*
+Returns true if the formulae are equal.
+ */
+bool Formula::isEqual(Formula* other) {
+	if (this->op == other->op) {
+		if (this->op == Operator::ATOM) {
+			if (this->var == other->var) return true;
+			else return false;
+		}
+		else if (this->op == Operator::TRUE) return true;
+		else if (this->op == Operator::FALSE) return true;
+		else if (this->left->isEqual(other->left) && this->right->isEqual(other->right)) return true;
+		else if (this->left->isEqual(other->right) && this->right->isEqual(other->left)) return true;
+		else return false;
+	} 
+	else return false;
+}

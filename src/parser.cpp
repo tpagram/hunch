@@ -7,8 +7,13 @@ Creates a Formula parsing an input string.
 Uses a recursive descent parser.
 */
 Formula* Parser::parse(string input) {
+	std::cout << "Tokenising input... ";
 	queue<string> *tokens = tokenise(input);
-	return parseEquality(tokens);
+	std::cout << "Done!\n";
+	std::cout << "Parsing tokens... ";
+	Formula* mainFormula = parseEquality(tokens);
+	std::cout << "Done!\n";
+	return mainFormula;
 }
 
 /*
