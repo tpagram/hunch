@@ -14,7 +14,7 @@ int main(int argc, char const *argv[]) {
 
 	//Parse input to formula.
 	Parser parser;
-	Formula* mainFormula = parser.parse(input);
+	Fptr mainFormula = Fptr(parser.parse(input));
 
 	//Clausify formula.
 	unique_ptr<Clausifier> clausifier = clausifierFactory::getClausifier("hunch");
@@ -22,7 +22,7 @@ int main(int argc, char const *argv[]) {
 
 
 	cout << mainFormula->toString() << endl;
-	delete(mainFormula);
+	//delete(mainFormula);
 	
 
 }

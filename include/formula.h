@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <memory>
 
 enum class Operator { FALSE, TRUE, ATOM, EQUAL, IMPLIES, OR, AND };
 
@@ -16,16 +17,20 @@ public:
 	~Formula();
 	std::string toString();
 	Operator getOp();
-	Formula* getLeft();
-	Formula* getRight();
+	std::unique_ptr<Formula>& getLeft();
+	std::unique_ptr<Formula>& getRight();
+	void setLeft(std::unique_ptr<Formula>);
+	void setRight(std::unique_ptr<Formula>);
+	void setOp(Operator);
 	bool isEqual(Formula*);
 
 private:
-	Formula* left;
-	Formula* right;
+	std::unique_ptr<Formula> left;
+	std::unique_ptr<Formula> right;
 	Operator op;
 	std::string var;
 	std::string toString(int priority);
 };	
 
+typedef std::unique_ptr<Formula> Fptr;
 #endif

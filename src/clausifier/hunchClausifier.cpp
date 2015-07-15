@@ -2,10 +2,10 @@
 
 using namespace std;
 
-void hunchClausifier::clausify(Formula* mainFormula) {
-	mainFormula = introduceGoal(mainFormula);
+void hunchClausifier::clausify(Fptr& mainFormula) {
+	introduceGoal(mainFormula);
 	cout << "goal introduced " << mainFormula->toString() << endl;
-	mainFormula = simplify(mainFormula);
+	simplify(mainFormula);
 	cout << "simplified " << mainFormula->toString() << endl;
 	return;
 }

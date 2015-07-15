@@ -7,11 +7,12 @@ class Clausifier
 {
 
 public:
-	virtual void clausify(Formula*) = 0;
+	virtual void clausify(Fptr&) = 0;
 
 protected:
-	virtual Formula* simplify(Formula*);
-	virtual Formula* introduceGoal(Formula*);
+	Fptr mainFormula;
+	virtual void simplify(Fptr&);
+	virtual void introduceGoal(Fptr&);
 };
 
 

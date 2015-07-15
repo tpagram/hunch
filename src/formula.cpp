@@ -5,10 +5,10 @@ using namespace std;
 /*
 Create a binary operator branch.
  */
-Formula::Formula(Formula* left, Formula* right, Operator op) {
-	this->left = left;
-	this->right = right;
-	this->op = op;
+Formula::Formula(Formula* left, Formula* right, Operator op): 
+	left(left),
+	right(right),
+	op(op) {
 	var.clear();
 }
 
@@ -36,9 +36,19 @@ Formula::Formula(Operator op) {
 Destroy entire formula.
  */
 Formula::~Formula(void) {
-	cout << this->toString() << " is being deleted" << endl;
-	delete(left);
-	delete(right);
+	if (this->op == Operator::ATOM || this->op == Operator::TRUE || this->op == Operator::FALSE) {
+		cout << "DELETING: " << this->toString() << endl;
+	}
+	else if (this->left.get() == nullptr && this->right.get() == nullptr) {
+		cout << "DELETING: NULL, NULL" << endl;
+	}
+	else if (this->left.get() == nullptr){
+		cout << "DELETING: NULL, " << this->right->toString() << endl;
+	}
+	else if (this->right.get() == nullptr){
+		cout << "DELETING: " << this->left->toString() << ", NULL" << endl;
+	}
+	else cout << "DELETING: " << this->toString() << endl;
 }
 
 /*
@@ -83,15 +93,36 @@ Operator Formula::getOp() {
 /*
 Return left subtree.
  */
-Formula* Formula::getLeft() {
+Fptr& Formula::getLeft() {
 	return left;
 }
 
 /*
 Return right subtree.
  */
-Formula* Formula::getRight() {
+Fptr& Formula::getRight() {
 	return right;
+}
+
+/*
+Sets left subtree.
+ */
+void Formula::setLeft(Fptr left) {
+	this->left = move(left);
+}
+
+/*
+Sets right subtree.
+ */
+void Formula::setRight(Fptr right) {
+	this->right = move(right);
+}
+
+/*
+Sets operator.
+ */
+void Formula::setOp(Operator op) {
+	this->op = op;
 }
 
 /*
@@ -105,8 +136,8 @@ bool Formula::isEqual(Formula* other) {
 		}
 		else if (this->op == Operator::TRUE) return true;
 		else if (this->op == Operator::FALSE) return true;
-		else if (this->left->isEqual(other->left) && this->right->isEqual(other->right)) return true;
-		else if (this->left->isEqual(other->right) && this->right->isEqual(other->left)) return true;
+		else if (this->left->isEqual(other->left.get()) && this->right->isEqual(other->right.get())) return true;
+		else if (this->left->isEqual(other->right.get()) && this->right->isEqual(other->left.get())) return true;
 		else return false;
 	} 
 	else return false;

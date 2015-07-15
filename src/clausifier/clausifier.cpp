@@ -4,70 +4,112 @@ using namespace std;
 /*
 Simplifies a formula using a variety of rules.
  */
-Formula* Clausifier::simplify(Formula* formula) {
+void Clausifier::simplify(Fptr& formula) {
+
 	// atom base cases
-	if (formula->getOp() == Operator::ATOM) return formula;
-	else if (formula->getOp() == Operator::TRUE) return formula;
-	else if (formula->getOp() == Operator::FALSE) return formula;
+	if (formula->getOp() == Operator::ATOM) return;
+	else if (formula->getOp() == Operator::TRUE) return;
+	else if (formula->getOp() == Operator::FALSE) return;
 
 	// recurse
-	Formula* left = simplify(formula->getLeft());
-	Formula* right = simplify(formula->getRight());
+	simplify(formula->getLeft());
+	simplify(formula->getRight());
 
 	// simplify a & b 
 	if (formula->getOp() == Operator::AND) {
-		if (left->isEqual(right)) return left;
-		else if (left->getOp() == Operator::TRUE) return right;
-		else if (right->getOp() == Operator::TRUE) return left;
-		else if (left->getOp() == Operator::FALSE) return new Formula (Operator::FALSE);
-		else if (right->getOp() == Operator::FALSE) return new Formula (Operator::FALSE);
-		else return new Formula (left, right, Operator::AND);
+		if (formula->getLeft()->isEqual(formula->getRight().get())) {
+			formula = move(formula->getLeft());
+		}
+		else if (formula->getLeft()->getOp() == Operator::TRUE) {
+			formula = move(formula->getRight());
+		}
+		else if (formula->getRight()->getOp() == Operator::TRUE) {
+			formula = move(formula->getLeft());
+		}
+		else if (formula->getLeft()->getOp() == Operator::FALSE) {
+			formula = Fptr(new Formula (Operator::FALSE));
+		}
+		else if (formula->getRight()->getOp() == Operator::FALSE) {
+			formula = Fptr(new Formula (Operator::FALSE));
+		}
 	}
+
 	// simplify a | b
 	else if (formula->getOp() == Operator::OR) {
-		if (left->isEqual(right)) return left;
-		else if (left->getOp() == Operator::TRUE) return new Formula (Operator::TRUE);
-		else if (right->getOp() == Operator::TRUE) return new Formula (Operator::TRUE);
-		else if (left->getOp() == Operator::FALSE) return right;
-		else if (right->getOp() == Operator::FALSE) return left;
-		else return new Formula (left, right, Operator::OR);
+		if (formula->getLeft()->isEqual(formula->getRight().get())) {
+			formula = move(formula->getLeft());
+		}
+		else if (formula->getLeft()->getOp() == Operator::TRUE) {
+			formula = Fptr(new Formula (Operator::TRUE));
+		}
+		else if (formula->getRight()->getOp() == Operator::TRUE) {
+			formula = Fptr(new Formula (Operator::TRUE));
+		}
+		else if (formula->getLeft()->getOp() == Operator::FALSE) {
+			formula = move(formula->getRight());
+		}
+		else if (formula->getRight()->getOp() == Operator::FALSE) {
+			formula = move(formula->getLeft());
+		}
 	}
+
 	// simplify a => b
 	else if (formula->getOp() == Operator::IMPLIES) {
-		if (left->isEqual(right)) return new Formula (Operator::TRUE);
-		else if (left->getOp() == Operator::TRUE) return right;
-		else if (right->getOp() == Operator::TRUE) return new Formula (Operator::TRUE);
-		else if (left->getOp() == Operator::FALSE) return new Formula (Operator::TRUE);
-		else if (right->getOp() == Operator::FALSE) return new Formula (left, right, Operator::IMPLIES);
-		else return new Formula (left, right, Operator::IMPLIES);
+		if (formula->getLeft()->isEqual(formula->getRight().get())) {
+			formula = Fptr(new Formula (Operator::TRUE));
+		}
+		else if (formula->getLeft()->getOp() == Operator::TRUE) {
+			formula = move(formula->getRight());
+		}
+		else if (formula->getRight()->getOp() == Operator::TRUE) {
+			formula = Fptr(new Formula (Operator::TRUE));
+		}
+		else if (formula->getLeft()->getOp() == Operator::FALSE) {
+			formula = Fptr(new Formula (Operator::TRUE));
+		}
+		else if (formula->getLeft()->getOp() == Operator::FALSE) {
+		}
 	}
+
 	// simplify a <=> b
 	else if (formula->getOp() == Operator::EQUAL) {
-		if (left->isEqual(right)) return new Formula (Operator::TRUE);
-		else if (left->getOp() == Operator::TRUE) return right;
-		else if (right->getOp() == Operator::TRUE) return left;
-		else if (left->getOp() == Operator::FALSE) return new Formula (right, left, Operator::IMPLIES);
-		else if (right->getOp() == Operator::FALSE) return new Formula (left, right, Operator::IMPLIES);
-		else return new Formula (left, right, Operator::EQUAL);
+		if (formula->getLeft()->isEqual(formula->getRight().get())) {
+			formula = Fptr(new Formula (Operator::TRUE));
+		}
+		else if (formula->getLeft()->getOp() == Operator::TRUE) {
+			formula = move(formula->getRight());
+		}
+		else if (formula->getRight()->getOp() == Operator::TRUE) {
+			formula = move(formula->getLeft());
+		}
+		else if (formula->getLeft()->getOp() == Operator::FALSE) {
+			formula->getLeft().swap(formula->getRight());
+			formula->setOp(Operator::IMPLIES);
+		}
+		else if (formula->getRight()->getOp() == Operator::FALSE) {
+			formula->setOp(Operator::IMPLIES);
+		}
 	}
-	else return new Formula (left, right, Operator::AND);
+	return;
 }
 
 /*
 Introduce a goal variable to a formula Q in the form Q -> goal.
 If Q is of the form a => b, we further simplify.
  */
-Formula* Clausifier::introduceGoal(Formula* formula) {
-	Formula* goalFormula;
+void Clausifier::introduceGoal(Fptr& formula) {
 	// If formula is of the form a => b, return a & introduceGoal(b).
 	if (formula->getOp() == Operator::IMPLIES) {
-		goalFormula = introduceGoal(formula->getRight());
-		goalFormula = new Formula (formula->getLeft(),goalFormula,Operator::AND);
+		introduceGoal(formula->getRight());
+		formula->setOp(Operator::AND);
 	}
 	//Otherwise return formula => goal.
 	else {
-		goalFormula = new Formula("#goal");
-		goalFormula = new Formula(formula, goalFormula, Operator::IMPLIES);
+		//Fptr temp = move(formula);
+		//formula = Fptr(new Formula(nullptr, new Formula("#goal"), Operator::IMPLIES));
+		//formula->setLeft(move(temp));
+		Fptr temp = Fptr(new Formula(nullptr, new Formula("#goal"), Operator::IMPLIES));
+		temp->setLeft(move(formula));
+		formula = move(temp);
 	}
-	return goalFormula;
 }

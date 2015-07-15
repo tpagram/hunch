@@ -5,7 +5,7 @@
 
 class hunchClausifier : public Clausifier
 {
-	virtual void clausify(Formula*);
+	virtual void clausify(Fptr&);
 };
 
 

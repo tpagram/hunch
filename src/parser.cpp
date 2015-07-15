@@ -8,10 +8,10 @@ Uses a recursive descent parser.
 */
 Formula* Parser::parse(string input) {
 	std::cout << "Tokenising input... ";
-	queue<string> *tokens = tokenise(input);
+	unique_ptr<queue<string>> tokens = unique_ptr<queue<string>>(tokenise(input));
 	std::cout << "Done!\n";
 	std::cout << "Parsing tokens... ";
-	Formula* mainFormula = parseEquality(tokens);
+	Formula* mainFormula = parseEquality(tokens.get());
 	std::cout << "Done!\n";
 	return mainFormula;
 }
