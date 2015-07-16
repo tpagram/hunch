@@ -17,6 +17,7 @@ public:
 	~Formula();
 	std::string toString();
 	Operator getOp();
+	std::string getVar();
 	std::unique_ptr<Formula>& getLeft();
 	std::unique_ptr<Formula>& getRight();
 	void setLeft(std::unique_ptr<Formula>);

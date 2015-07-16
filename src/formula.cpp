@@ -91,6 +91,13 @@ Operator Formula::getOp() {
 }
 
 /*
+Return atomic variable.
+ */
+string Formula::getVar() {
+	return var;
+}
+
+/*
 Return left subtree.
  */
 Fptr& Formula::getLeft() {

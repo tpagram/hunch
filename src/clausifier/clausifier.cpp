@@ -113,3 +113,44 @@ void Clausifier::introduceGoal(Fptr& formula) {
 		formula = move(temp);
 	}
 }
+
+/*
+Returns true if for a given op the formula is of the form a op b op c op d ...
+ */
+bool Clausifier::soleOperatorFormula(Formula& formula, Operator op) {
+	if (formula.getOp() == Operator::ATOM) return true;
+	else if (formula.getOp() == Operator::TRUE) return true;
+	else if (formula.getOp() == Operator::FALSE) return true;
+	else if (formula.getOp() == op) {
+		bool sole = soleOperatorFormula(*formula.getLeft().get(),op);
+		sole &= soleOperatorFormula(*formula.getRight().get(),op);
+		return sole;
+	}
+	else return false;
+}
+
+/*
+Returns true if the formula is of the form a & b & ... => c | d | ...
+ */
+bool Clausifier::isClassical(Formula& formula) {
+	if (formula.getOp() == Operator::IMPLIES &&
+			soleOperatorFormula(*formula.getLeft().get(), Operator::AND) &&
+			soleOperatorFormula(*formula.getRight().get(), Operator::OR)) {
+		return true;
+	} 
+	else return false;
+}
+
+/*
+Returns true if the formula is of the form (a => b) => c
+ */
+bool Clausifier::isImplication(Formula& formula) {
+	if (formula.getOp() == Operator::IMPLIES &&
+			formula.getRight()->getOp() == Operator::ATOM &&
+			formula.getLeft()->getOp() == Operator::IMPLIES &&
+			formula.getLeft()->getLeft()->getOp() == Operator::ATOM &&
+			formula.getLeft()->getRight()->getOp() == Operator::ATOM) {
+		return true;
+	} 
+	else return false;
+}

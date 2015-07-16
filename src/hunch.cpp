@@ -20,9 +20,5 @@ int main(int argc, char const *argv[]) {
 	unique_ptr<Clausifier> clausifier = clausifierFactory::getClausifier("hunch");
 	clausifier->clausify(mainFormula);
 
-
-	cout << mainFormula->toString() << endl;
-	//delete(mainFormula);
 	
-
 }
