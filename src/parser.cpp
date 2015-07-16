@@ -110,7 +110,7 @@ Formula* Parser::parseConjunction(queue<string>* tokens) {
 Formula* Parser::parseNegation(queue<string>* tokens) {
 	if (!tokens->empty() && tokens->front() == "~") {
 		tokens->pop();
-		Formula* left = parseTerm(tokens);
+		Formula* left = parseNegation(tokens);
 		Formula* right = new Formula(Operator::FALSE);
 		return new Formula(left, right, Operator::IMPLIES);
 	}
