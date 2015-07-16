@@ -6,6 +6,7 @@
 class IClause : public Clause {
 
 public:
+	IClause(std::string, std::string, std::string);
 	virtual std::string toString();
 private:
 	std::array<std::string,3> clause;

@@ -11,6 +11,7 @@ public:
 
 private:
 	virtual void extractClauses(std::queue<Fptr>&);
+	int renameCounter = 0;
 };
 
 

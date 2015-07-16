@@ -14,6 +14,7 @@ public:
 	Formula(Formula*, Formula*, Operator);
 	Formula(std::string var);
 	Formula(Operator);
+	Formula(const Formula&);
 	~Formula();
 	std::string toString();
 	Operator getOp();
@@ -24,6 +25,7 @@ public:
 	void setRight(std::unique_ptr<Formula>);
 	void setOp(Operator);
 	bool isEqual(Formula*);
+	bool isAtomic();
 
 private:
 	std::unique_ptr<Formula> left;

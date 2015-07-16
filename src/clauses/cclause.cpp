@@ -11,11 +11,19 @@ CClause::CClause(string left,string right) {
 }
 
 /*
+Initialise CClause with left -> right
+ */
+CClause::CClause(vector<string> left,vector<string> right) {
+	clause[0] = left;
+	clause[1] = right;
+}
+
+/*
 Returns a readable string of the clause.
  */
 string CClause::toString() {
 	string str = "[";
-	for (string i : clause[0]) str += "~" + i + ", ";
+	for (string i : clause[0]) str += i + ", ";
 	if (str.back() == ' ') str.erase(str.end()-2, str.end());
 	str += "] => [";
 	for (string i : clause[1]) str += i + ", ";

@@ -33,22 +33,27 @@ Formula::Formula(Operator op) {
 }
 
 /*
+Clone existing formula.
+ */
+Formula::Formula(const Formula& other) {
+	op = other.op;
+	if (op == Operator::ATOM) {
+		var = other.var;
+		return;
+	}
+	else if (op == Operator::TRUE) return;
+	else if (op == Operator::FALSE) return;
+	else {
+		left = Fptr(new Formula(*other.left));
+		right = Fptr(new Formula(*other.right));
+	}
+}
+
+/*
 Destroy entire formula.
  */
 Formula::~Formula(void) {
-	if (this->op == Operator::ATOM || this->op == Operator::TRUE || this->op == Operator::FALSE) {
 		cout << "DELETING: " << this->toString() << endl;
-	}
-	else if (this->left.get() == nullptr && this->right.get() == nullptr) {
-		cout << "DELETING: NULL, NULL" << endl;
-	}
-	else if (this->left.get() == nullptr){
-		cout << "DELETING: NULL, " << this->right->toString() << endl;
-	}
-	else if (this->right.get() == nullptr){
-		cout << "DELETING: " << this->left->toString() << ", NULL" << endl;
-	}
-	else cout << "DELETING: " << this->toString() << endl;
 }
 
 /*
@@ -71,6 +76,9 @@ string Formula::toString(int priority) {
 	if (op == Operator::ATOM) str += var;
 	else if (op == Operator::TRUE) str += "true";
 	else if (op == Operator::FALSE) str += "false";
+	else if (left == nullptr && right == nullptr) return "NULL, NULL";
+	else if (left == nullptr) return "NULL, " + right->toString();
+	else if (right == nullptr) return left->toString() + ", NULL";
 	else if (op == Operator::AND) str += left->toString(6) + " & "  + right->toString(6);
 	else if (op == Operator::OR) str += left->toString(5) + " | "  + right->toString(5);
 	else if (op == Operator::IMPLIES) str += left->toString(4) + " => "  + right->toString(4);
@@ -94,7 +102,9 @@ Operator Formula::getOp() {
 Return atomic variable.
  */
 string Formula::getVar() {
-	return var;
+	if (op == Operator::TRUE) return "true";
+	else if (op == Operator::FALSE) return "false";
+	else return var;
 }
 
 /*
@@ -147,5 +157,16 @@ bool Formula::isEqual(Formula* other) {
 		else if (this->left->isEqual(other->right.get()) && this->right->isEqual(other->left.get())) return true;
 		else return false;
 	} 
+	else return false;
+}
+
+/*
+Returns true if the formula is atomic.
+ */
+bool Formula::isAtomic() {
+	if (op == Operator::TRUE ||
+			op == Operator::FALSE ||
+			op == Operator::ATOM)
+		return true;
 	else return false;
 }

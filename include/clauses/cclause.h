@@ -7,6 +7,7 @@ class CClause : public Clause {
 
 public:
 	CClause(std::string,std::string);
+	CClause(std::vector<std::string>,std::vector<std::string>);
 	virtual std::string toString();
 	void addLeft(std::string);
 	void addRight(std::string);

@@ -5,6 +5,7 @@
 #include "clauses/cclause.h"
 #include "clauses/iclause.h"
 #include <vector>
+#include <queue>
 
 class Clausifier
 {
@@ -15,9 +16,14 @@ public:
 protected:
 	virtual void simplify(Fptr&);
 	virtual void introduceGoal(Fptr&);
+	virtual bool soleOperatorFormula(Formula&,Operator);
+	virtual std::vector<Fptr> extractSubformulae(Fptr&,Operator);
+	virtual Formula* constructSoleOperatorFormula(std::vector<Fptr>&, Operator);
 	virtual bool isClassical(Formula&);
 	virtual bool isImplication(Formula&);
-	virtual bool soleOperatorFormula(Formula&,Operator);
+	virtual CClause formulaToClassical(Fptr&);
+	virtual IClause formulaToImplication(Fptr&);
+
 };
 
 #endif
