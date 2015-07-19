@@ -16,6 +16,7 @@ public:
 protected:
 	virtual void simplify(Fptr&);
 	virtual void introduceGoal(Fptr&);
+	virtual void flattenEquivalence(Fptr&);
 	virtual bool soleOperatorFormula(Formula&,Operator);
 	virtual std::vector<Fptr> extractSubformulae(Fptr&,Operator);
 	virtual Formula* constructSoleOperatorFormula(std::vector<Fptr>&, Operator);

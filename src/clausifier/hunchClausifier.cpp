@@ -6,11 +6,18 @@ using namespace std;
 Dismantles a formula into a set of classical and implication clauses.
  */
 void hunchClausifier::clausify(Fptr& mainFormula) {
+
 	introduceGoal(mainFormula);
 	cout << "goal introduced: " << mainFormula->toString() << endl;
+
 	debug = mainFormula->toString();
+
 	simplify(mainFormula);
 	cout << "simplified: " << mainFormula->toString() << endl;
+	
+	flattenEquivalence(mainFormula);
+	cout << "equivalence removed: " << mainFormula->toString() << endl;
+
 	queue<Fptr> formulae;
 	formulae.push(move(mainFormula));
 	extractClauses(formulae);
@@ -209,7 +216,7 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 					formulae.push(move(temp2));
 				}
 				else {
-					cerr << "ERROR: Clausifier encountered an unrecognied form" << endl;
+					cerr << "ERROR: Clausifier encountered an unrecognised form" << endl;
 					exit(1);
 				}
 				break;

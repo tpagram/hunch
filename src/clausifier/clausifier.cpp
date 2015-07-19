@@ -105,13 +105,40 @@ void Clausifier::introduceGoal(Fptr& formula) {
 	}
 	//Otherwise return formula => goal.
 	else {
-		//Fptr temp = move(formula);
-		//formula = Fptr(new Formula(nullptr, new Formula("#goal"), Operator::IMPLIES));
-		//formula->setLeft(move(temp));
 		Fptr temp = Fptr(new Formula(nullptr, new Formula("#goal"), Operator::IMPLIES));
 		temp->setLeft(move(formula));
 		formula = move(temp);
 	}
+}
+
+/*
+Change all a <=> b subformulae to a => b & a <= b.
+ */
+void Clausifier::flattenEquivalence(Fptr& formula) {
+	if (formula->getOp() == Operator::ATOM ||
+		formula->getOp() == Operator::TRUE ||
+		formula->getOp() == Operator::FALSE) {
+		return;
+	}
+	else {
+		flattenEquivalence(formula->getLeft());
+		flattenEquivalence(formula->getRight());
+	}
+	
+	if (formula->getOp() == Operator::EQUAL) {
+		flattenEquivalence(formula->getLeft());
+		flattenEquivalence(formula->getRight());
+		Fptr tempLeft = Fptr(new Formula(nullptr,nullptr,Operator::IMPLIES));
+		Fptr tempRight = Fptr(new Formula(nullptr,nullptr,Operator::IMPLIES));
+		tempLeft->setLeft(Fptr(new Formula(*formula->getLeft())));
+		tempLeft->setRight(Fptr(new Formula(*formula->getRight())));
+		tempRight->setLeft(move(formula->getRight()));
+		tempRight->setRight(move(formula->getLeft()));
+		formula->setLeft(move(tempLeft));
+		formula->setRight(move(tempRight));
+		formula->setOp(Operator::AND);
+	}
+	return;
 }
 
 /*
