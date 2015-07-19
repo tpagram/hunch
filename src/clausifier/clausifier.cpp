@@ -2,7 +2,7 @@
 using namespace std;
 
 /*
-Simplifies a formula using a variety of rules.
+Simplifies a formula using a variety of TRUE/FALSE rules.
  */
 void Clausifier::simplify(Fptr& formula) {
 
@@ -139,11 +139,11 @@ vector<Fptr> Clausifier::extractSubformulae(Fptr& formula, Operator op) {
 	subformulae.push(move(formula->getLeft()));
 	subformulae.push(move(formula->getRight()));
 	while (!subformulae.empty()) {
-		if (subformulae.front()->getOp() == Operator::ATOM) {
+		if (subformulae.front()->isAtomic()) {
 			lowestSubs.push_back(move(subformulae.front()));
 			subformulae.pop();
 		}
-		if (subformulae.front()->getOp() == op) {
+		else if (subformulae.front()->getOp() == op) {
 			subformulae.push(move(subformulae.front()->getLeft()));
 			subformulae.push(move(subformulae.front()->getRight()));
 			subformulae.pop();
@@ -161,7 +161,6 @@ Constructs a formula out of the given subformula and operator.
 For example, ([a,b,(c => d)], &) becomes a & b & (c => d)
  */
 Formula* Clausifier::constructSoleOperatorFormula(std::vector<Fptr>& subs, Operator op) {
-	cout << subs.size() << endl;
 	if (subs.size() < 2) return nullptr;
 	Formula *formula = new Formula (nullptr, nullptr, op);
 	formula->setLeft(move(subs.back()));
@@ -173,7 +172,6 @@ Formula* Clausifier::constructSoleOperatorFormula(std::vector<Fptr>& subs, Opera
 		formula->setLeft(move(subs.back()));
 		subs.pop_back();
 	}
-	cout << formula->toString() << endl;
 	return formula;
 }
 
@@ -234,7 +232,7 @@ CClause Clausifier::formulaToClassical(Fptr& formula) {
 		else {
 			rightQueue.push(move(rightQueue.front()->getLeft()));
 			rightQueue.push(move(rightQueue.front()->getRight()));
-			leftQueue.pop();
+			rightQueue.pop();
 		}
 	}
 	return CClause(left,right);

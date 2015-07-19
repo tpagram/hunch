@@ -22,13 +22,20 @@ CClause::CClause(vector<string> left,vector<string> right) {
 Returns a readable string of the clause.
  */
 string CClause::toString() {
-	string str = "[";
+	/*string str = "[";
 	for (string i : clause[0]) str += i + ", ";
 	if (str.back() == ' ') str.erase(str.end()-2, str.end());
 	str += "] => [";
 	for (string i : clause[1]) str += i + ", ";
 	if (str.back() == ' ') str.erase(str.end()-2, str.end());
 	str += "]";	
+	return str;*/
+	string str;
+	for (string i : clause[0]) str += i + " & ";
+	if (str.back() == ' ') str.erase(str.end()-2, str.end());
+	if (clause[0].size() > 0 && clause[1].size() > 0) str += " => ";
+	for (string i : clause[1]) str += i + " | ";
+	if (str.back() == ' ') str.erase(str.end()-2, str.end());	
 	return str;
 }
 

@@ -16,9 +16,10 @@ public:
 	Formula(Operator);
 	Formula(const Formula&);
 	~Formula();
+	bool operator==(const Formula& other) const;
 	std::string toString();
-	Operator getOp();
-	std::string getVar();
+	Operator getOp() const;
+	std::string getVar() const;
 	std::unique_ptr<Formula>& getLeft();
 	std::unique_ptr<Formula>& getRight();
 	void setLeft(std::unique_ptr<Formula>);
@@ -26,6 +27,7 @@ public:
 	void setOp(Operator);
 	bool isEqual(Formula*);
 	bool isAtomic();
+	struct FormulaHash {size_t operator()(const Formula& formula) const;};
 
 private:
 	std::unique_ptr<Formula> left;

@@ -53,7 +53,22 @@ Formula::Formula(const Formula& other) {
 Destroy entire formula.
  */
 Formula::~Formula(void) {
-		cout << "DELETING: " << this->toString() << endl;
+		//cout << "DELETING: " << this->toString() << endl;
+}
+
+bool Formula::operator==(const Formula& other) const {
+	if (this->op == other.op) {
+		if (this->op == Operator::ATOM) {
+			if (this->var == other.var) return true;
+			else return false;
+		}
+		else if (this->op == Operator::TRUE) return true;
+		else if (this->op == Operator::FALSE) return true;
+		else if (*this->left == *other.left && *this->right == *other.right) return true;
+		else if (*this->left == *other.right && *this->right == *other.left) return true;
+		else return false;
+	} 
+	else return false;
 }
 
 /*
@@ -94,14 +109,14 @@ string Formula::toString(int priority) {
 /*
 Return operator variable.
  */
-Operator Formula::getOp() {
+Operator Formula::getOp() const {
 	return op;
 }
 
 /*
 Return atomic variable.
  */
-string Formula::getVar() {
+string Formula::getVar() const {
 	if (op == Operator::TRUE) return "true";
 	else if (op == Operator::FALSE) return "false";
 	else return var;
@@ -169,4 +184,21 @@ bool Formula::isAtomic() {
 			op == Operator::ATOM)
 		return true;
 	else return false;
+}
+
+/*
+Hasher of formulae for use in unordered_map.
+ */
+size_t Formula::FormulaHash::operator()(const Formula& formula) const {
+	if (formula.op == Operator::ATOM) {
+		return hash<std::string>()(formula.var);
+	}
+	else if (formula.op == Operator::TRUE || formula.op == Operator::FALSE) {
+		return hash<int>()((int) formula.op);
+	}
+	else {
+ 		return hash<int>()((int) formula.op) ^
+ 				(operator()(*formula.left) << 1) >> 1 ^
+				operator()(*formula.right) << 1;
+	}
 }
