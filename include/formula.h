@@ -17,7 +17,7 @@ public:
 	Formula(const Formula&);
 	~Formula();
 	bool operator==(const Formula& other) const;
-	std::string toString();
+	std::string toString() const;
 	Operator getOp() const;
 	std::string getVar() const;
 	std::unique_ptr<Formula>& getLeft();
@@ -34,7 +34,7 @@ private:
 	std::unique_ptr<Formula> right;
 	Operator op;
 	std::string var;
-	std::string toString(int priority);
+	std::string toString(int priority) const;
 };	
 
 typedef std::unique_ptr<Formula> Fptr;

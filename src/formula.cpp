@@ -64,6 +64,10 @@ bool Formula::operator==(const Formula& other) const {
 		}
 		else if (this->op == Operator::TRUE) return true;
 		else if (this->op == Operator::FALSE) return true;
+		if (this->op == Operator::IMPLIES) {
+			if (*this->left == *other.left && *this->right == *other.right) return true;
+			else return false;
+		}
 		else if (*this->left == *other.left && *this->right == *other.right) return true;
 		else if (*this->left == *other.right && *this->right == *other.left) return true;
 		else return false;
@@ -74,14 +78,14 @@ bool Formula::operator==(const Formula& other) const {
 /*
 Public access to toString method.
  */
-string Formula::toString() {
+string Formula::toString() const {
 	return toString(0);
 }
 
 /*
 Converts the formula to a readable string.
  */
-string Formula::toString(int priority) {
+string Formula::toString(int priority) const {
 	bool needBrackets = false;
 	string str = "";
 	if (priority >= (int) op && (int) op > 2) {
@@ -168,10 +172,20 @@ bool Formula::isEqual(Formula* other) {
 		}
 		else if (this->op == Operator::TRUE) return true;
 		else if (this->op == Operator::FALSE) return true;
-		else if (this->left->isEqual(other->left.get()) && this->right->isEqual(other->right.get())) return true;
-		else if (this->left->isEqual(other->right.get()) && this->right->isEqual(other->left.get())) return true;
-		else return false;
-	} 
+		else if (this->op == Operator::IMPLIES) {
+			if (this->left->isEqual(other->left.get()) && this->right->isEqual(other->right.get())) {
+				return true;
+			}
+			else return false;
+		}
+		else {
+			if ((this->left->isEqual(other->left.get()) && this->right->isEqual(other->right.get())) ||
+				(this->left->isEqual(other->right.get()) && this->right->isEqual(other->left.get()))) {
+				return true;
+			}
+			else return false;
+		}
+	}
 	else return false;
 }
 
@@ -196,9 +210,23 @@ size_t Formula::FormulaHash::operator()(const Formula& formula) const {
 	else if (formula.op == Operator::TRUE || formula.op == Operator::FALSE) {
 		return hash<int>()((int) formula.op);
 	}
-	else {
- 		return hash<int>()((int) formula.op) ^
+	else if (formula.op == Operator::IMPLIES) {
+		return hash<int>()((int) formula.op) ^
  				(operator()(*formula.left) << 1) >> 1 ^
 				operator()(*formula.right) << 1;
+	}
+	else {
+		size_t left = operator()(*formula.left);
+		size_t right = operator()(*formula.right);
+		if (left >= right) {
+			return hash<int>()((int) formula.op) ^
+ 				(left << 1) >> 1 ^
+				right << 1;
+		}
+ 		else {
+ 			return hash<int>()((int) formula.op) ^
+ 				(right << 1) >> 1 ^
+				left << 1;
+ 		}
 	}
 }

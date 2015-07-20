@@ -35,6 +35,10 @@ queue<string>* Parser::tokenise(string input) {
 					atom.push_back(input.at(j));
 					i++;
 				}
+				else if (input.at(j) == '_') {
+					atom.push_back(input.at(j));
+					i++;
+				}
 				else break;
 			}
 			tokens->push(atom);

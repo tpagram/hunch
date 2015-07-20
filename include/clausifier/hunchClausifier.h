@@ -4,10 +4,11 @@
 #include "clausifier/clausifier.h"
 #include <queue>
 #include <unordered_map>
+#include <memory>
 
 enum class Direction { implies, equiv, implied }; 
 
-
+typedef std::unordered_map<Formula,std::pair<std::string,Direction>,Formula::FormulaHash> FormulaMap;
 class hunchClausifier : public Clausifier
 {
 public:
@@ -15,8 +16,9 @@ public:
 
 private:
 	int renameCounter = 0;
-	std::unordered_map<Formula,std::pair<std::string,Direction>,Formula::FormulaHash> nameMap;
+	std::unique_ptr<FormulaMap> nameMap = std::unique_ptr<FormulaMap>(new FormulaMap());
 	std::string debug;
+	bool verbose = false;
 
 	virtual void extractClauses(std::queue<Fptr>&);
 	std::string newName();

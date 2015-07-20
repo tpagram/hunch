@@ -8,15 +8,16 @@ Dismantles a formula into a set of classical and implication clauses.
 void hunchClausifier::clausify(Fptr& mainFormula) {
 
 	introduceGoal(mainFormula);
-	cout << "goal introduced: " << mainFormula->toString() << endl;
+	if (verbose) cout << "goal introduced: " << mainFormula->toString() << endl;
 
-	debug = mainFormula->toString();
+	//debug = mainFormula->toString();
 
-	simplify(mainFormula);
-	cout << "simplified: " << mainFormula->toString() << endl;
-	
-	flattenEquivalence(mainFormula);
-	cout << "equivalence removed: " << mainFormula->toString() << endl;
+	simplify(mainFormula); //todo fix b & (a & b) not simplifying to a & b.
+	if (verbose) cout << "simplified: " << mainFormula->toString() << endl;
+
+	//flattenEquivalence(mainFormula);
+	//cout << "equivalence removed: " << mainFormula->toString() << endl;
+
 
 	queue<Fptr> formulae;
 	formulae.push(move(mainFormula));
@@ -28,9 +29,10 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 	vector<CClause> classical;
 	vector<IClause> implication;
 	while (!formulae.empty()) {
+
 		Fptr currentFormula = move(formulae.front());
 		formulae.pop();
-		cout << "current: " << currentFormula->toString() << endl;
+		//if (verbose) cout << currentFormula->toString() << endl;
 		if (isClassical(*currentFormula)) {
 			classical.push_back(formulaToClassical(currentFormula));
 			continue;
@@ -67,6 +69,20 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 					}
 				}
 				classical.push_back(clause);
+				break;
+			}
+
+			// todo
+			case Operator::EQUAL: {
+				Fptr temp = Fptr(new Formula(*currentFormula));
+				Fptr temp2 = move(temp->getLeft());
+				temp->setLeft(move(temp->getRight()));
+				temp->setRight(move(temp2));
+				temp->setOp(Operator::IMPLIES);
+				formulae.push(move(temp));
+
+				currentFormula->setOp(Operator::IMPLIES);
+				formulae.push(move(currentFormula));
 				break;
 			}
 
@@ -111,6 +127,7 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 
 				// A | B => C becomes A => C, B => C.
 				else if (currentFormula->getLeft()->getOp() == Operator::OR) {
+
 					Fptr newLeftFormula = Fptr(new Formula(nullptr, nullptr, Operator::IMPLIES));
 					Fptr newRightFormula = Fptr(new Formula(nullptr, nullptr, Operator::IMPLIES));
 					string oldName = checkForName(*currentFormula->getLeft()->getLeft(),Direction::implied);
@@ -146,7 +163,6 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 					else {
 						newLeftFormula->setRight(Fptr(new Formula(oldName)));
 					}
-
 					newRightFormula->setLeft(move(currentFormula->getLeft()));
 					oldName = checkForName(*currentFormula->getRight()->getRight(),Direction::implies);
 					if (oldName == "") {
@@ -155,7 +171,6 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 					else {
 						newRightFormula->setRight(Fptr(new Formula(oldName)));
 					}
-
 					formulae.push(move(newLeftFormula));
 					formulae.push(move(newRightFormula));
 				}
@@ -171,13 +186,28 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 					formulae.push(move(currentFormula));
 				}
 
+				// A => (B <=> C) becomes A & B => C, A & C => B
+				else if (currentFormula->getRight()->getOp() == Operator::EQUAL) {
+					Fptr newLeftFormula = Fptr(new Formula(nullptr,nullptr, Operator::IMPLIES));
+					newLeftFormula->setLeft(Fptr(new Formula(nullptr,nullptr,Operator::AND)));
+					newLeftFormula->getLeft()->setLeft(Fptr(new Formula(*currentFormula->getLeft())));
+					newLeftFormula->getLeft()->setRight(Fptr(new Formula(*currentFormula->getRight()->getLeft())));
+					newLeftFormula->setRight(Fptr(new Formula(*currentFormula->getRight()->getRight())));
+					formulae.push(move(newLeftFormula));
+
+					Fptr newRightFormula = Fptr(new Formula(nullptr,nullptr, Operator::IMPLIES));
+					newRightFormula->setLeft(Fptr(new Formula(nullptr,nullptr,Operator::AND)));
+					newRightFormula->getLeft()->setLeft(move(currentFormula->getLeft()));
+					newRightFormula->getLeft()->setRight(move(currentFormula->getRight()->getRight()));
+					newRightFormula->setRight(move(currentFormula->getRight()->getLeft()));
+					formulae.push(move(newRightFormula));
+				}
+
 				// A & B & c ... => D becomes pA & pB & c ... => D, with A => pA, ...
 				else if (currentFormula->getLeft()->getOp() == Operator::AND &&
 							!soleOperatorFormula(*currentFormula->getLeft(),Operator::AND)) {
-					cout << "uhuh\n";
 					vector<Fptr> newAndFormulae;
 					vector<Fptr> andFormulae = extractSubformulae(currentFormula->getLeft(), Operator::AND);
-					cout << "uhuh\n";
 					for (Fptr& f : andFormulae) {
 						if (f->isAtomic()) newAndFormulae.push_back(move(f));
 						else {
@@ -203,7 +233,6 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 						else {
 							pair<Formula*,string> newName = rename(move(f), Direction::implies);
 							if (newName.first != NULL) {
-								cout << "imp or " << newName.first->toString() << endl;
 								formulae.push(Fptr(newName.first));
 							}
 							newOrFormulae.push_back(Fptr(new Formula(newName.second)));
@@ -215,13 +244,29 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 					temp2->setRight(move(temp1));
 					formulae.push(move(temp2));
 				}
+
+				// (A <=> B) => C) becomes ((A => B) & (B => A)) => C)
+				else if (currentFormula->getLeft()->getOp() == Operator::EQUAL) {
+					cout << "ok\n";
+					Fptr temp = Fptr(new Formula(nullptr, nullptr, Operator::AND));
+					temp->setLeft(Fptr(new Formula(nullptr,nullptr, Operator::IMPLIES)));
+					temp->setRight(Fptr(new Formula(nullptr,nullptr, Operator::IMPLIES)));
+
+					temp->getLeft()->setLeft(Fptr(new Formula(*currentFormula->getLeft()->getLeft())));
+					temp->getLeft()->setRight(Fptr(new Formula(*currentFormula->getLeft()->getRight())));
+
+					temp->getRight()->setLeft(move(currentFormula->getLeft()->getRight()));
+					temp->getRight()->setRight(move(currentFormula->getLeft()->getLeft()));
+
+					currentFormula->setLeft(move(temp));
+					formulae.push(move(currentFormula));
+				}
 				else {
 					cerr << "ERROR: Clausifier encountered an unrecognised form" << endl;
 					exit(1);
 				}
 				break;
 
-			case Operator::EQUAL: 
 			case Operator::FALSE: 
 			case Operator::TRUE:
 				cerr << "ERROR: Unexpected operator in extractClauses." << endl;
@@ -230,14 +275,18 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 	}
 	cout << "VARIABLES INTRODUCED: " << renameCounter << endl;
 	cout << "CLASSICAL CLAUSES (" << classical.size() << ") :" << endl;
-	for (CClause i : classical) {
-		cout << i.toString() << endl;
+	if (verbose) {
+		for (CClause i : classical) {
+			cout << i.toString() << endl;
+		}
 	}
 	cout << "IMPLICATION CLAUSES (" << implication.size() << ") :" << endl;
-	for (IClause i : implication) {
-		cout << i.toString() << endl;
+	if (verbose) {
+		for (IClause i : implication) {
+			cout << i.toString() << endl;
+		}
 	}
-	cout << "Ready for copypaste:" << endl;
+	/*cout << "Ready for copypaste:" << endl;
 	cout << "(";
 	for (CClause i : classical) {
 		cout << "(" << i.toString() << ") &";
@@ -246,7 +295,7 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 		if (i == (implication.size()-1)) cout << "(" << implication.at(i).toString() << ")";
 		else cout << "(" << implication.at(i).toString() << ") &";
 	}
-	cout << ") => (" << debug << ")" <<endl;
+	cout << ") => (" << debug << ")" <<endl;*/
 }
 
 string hunchClausifier::newName() {
@@ -257,12 +306,12 @@ string hunchClausifier::newName() {
 
 pair<Formula*,string> hunchClausifier::rename(Fptr formula, Direction dir) {
 	pair<Formula*,string> renamed;
-	auto i = nameMap.find(*formula);
-	if (i == nameMap.end()) { 
+	auto i = nameMap->find(*formula);
+	if (i == nameMap->end()) { 
 		renamed.second = "r" + to_string(renameCounter);
 		renameCounter++;
-		nameMap[*formula] = make_pair(renamed.second, dir);
-		//nameMap->emplace(*formula,make_pair(renamed.second, dir));
+		//nameMap[*formula] = make_pair(renamed.second, dir);
+		nameMap->emplace(*formula,make_pair(renamed.second, dir));
 		renamed.first = createRenamedFormula(renamed.second, move(formula), dir);
 	}
 	else {
@@ -282,7 +331,6 @@ Formula* hunchClausifier::createRenamedFormula(string name, Fptr formula, Direct
 		case Direction::implies:
 			renamed = new Formula (new Formula(name), nullptr, Operator::IMPLIES);
 			renamed->setRight(move(formula));
-			std::cout << renamed->toString() << endl;
 			break;
 		case Direction::implied:
 			renamed = new Formula (nullptr, new Formula(name), Operator::IMPLIES);
@@ -301,8 +349,8 @@ Formula* hunchClausifier::createRenamedFormula(string name, Fptr formula, Direct
 }
 
 string hunchClausifier::checkForName(Formula formula, Direction dir) {
-	auto i = nameMap.find(formula);
-	if (i == nameMap.end()) return "";
+	auto i = nameMap->find(formula);
+	if (i == nameMap->end()) return "";
 	else if (i->second.second != Direction::equiv && i->second.second != dir) return "";
 	else return i->second.first;
 }
