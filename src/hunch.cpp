@@ -13,8 +13,8 @@ int main(int argc, char const *argv[]) {
 	}
 
 	//Parse input to formula.
-	Parser parser;
-	Fptr mainFormula = Fptr(parser.parse(input));
+	unique_ptr<Parser> parser = unique_ptr<Parser>(new Parser);
+	Fptr mainFormula = Fptr(parser->parse(input));
 
 	//Clausify formula.
 	unique_ptr<Clausifier> clausifier = clausifierFactory::getClausifier("hunch");

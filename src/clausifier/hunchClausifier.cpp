@@ -3,36 +3,50 @@
 using namespace std;
 
 /*
-Dismantles a formula into a set of classical and implication clauses.
+Dismantles a formula into a set of clauses ready for solving.
  */
-void hunchClausifier::clausify(Fptr& mainFormula) {
+ClausalForm hunchClausifier::clausify(Fptr& mainFormula) {
 
 	introduceGoal(mainFormula);
 	if (verbose) cout << "goal introduced: " << mainFormula->toString() << endl;
 
-	//debug = mainFormula->toString();
-
 	simplify(mainFormula); //todo fix b & (a & b) not simplifying to a & b.
 	if (verbose) cout << "simplified: " << mainFormula->toString() << endl;
 
-	//flattenEquivalence(mainFormula);
-	//cout << "equivalence removed: " << mainFormula->toString() << endl;
+	std::cout << "Extracting clauses... ";
+	ClausalForm clauses = extractClauses(mainFormula);
+	std::cout << "Done!\n";
 
+	cout << "VARIABLES INTRODUCED: " << renameCounter << endl;
+	cout << "CLASSICAL CLAUSES (" << clauses.first.size() << ") :" << endl;
+	if (verbose) {
+		for (CClause i : clauses.first) {
+			cout << i.toString() << endl;
+		}
+	}
+	cout << "IMPLICATION CLAUSES (" << clauses.second.size() << ") :" << endl;
+	if (verbose) {
+		for (IClause i : clauses.second) {
+			cout << i.toString() << endl;
+		}
+	}
 
-	queue<Fptr> formulae;
-	formulae.push(move(mainFormula));
-	extractClauses(formulae);
-	return;
+	return clauses;
 }
 
-void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
+
+/*
+Extracts classical and implication clauses from formula.
+ */
+ClausalForm hunchClausifier::extractClauses(Fptr& mainFormula) {
+	queue<Fptr> formulae;
+	formulae.push(move(mainFormula));
 	vector<CClause> classical;
 	vector<IClause> implication;
 	while (!formulae.empty()) {
 
 		Fptr currentFormula = move(formulae.front());
 		formulae.pop();
-		//if (verbose) cout << currentFormula->toString() << endl;
 		if (isClassical(*currentFormula)) {
 			classical.push_back(formulaToClassical(currentFormula));
 			continue;
@@ -273,37 +287,12 @@ void hunchClausifier::extractClauses(queue<Fptr>& formulae) {
 				exit(1);
 		}
 	}
-	cout << "VARIABLES INTRODUCED: " << renameCounter << endl;
-	cout << "CLASSICAL CLAUSES (" << classical.size() << ") :" << endl;
-	if (verbose) {
-		for (CClause i : classical) {
-			cout << i.toString() << endl;
-		}
-	}
-	cout << "IMPLICATION CLAUSES (" << implication.size() << ") :" << endl;
-	if (verbose) {
-		for (IClause i : implication) {
-			cout << i.toString() << endl;
-		}
-	}
-	/*cout << "Ready for copypaste:" << endl;
-	cout << "(";
-	for (CClause i : classical) {
-		cout << "(" << i.toString() << ") &";
-	}
-	for (int i = 0; i < implication.size(); i++) {
-		if (i == (implication.size()-1)) cout << "(" << implication.at(i).toString() << ")";
-		else cout << "(" << implication.at(i).toString() << ") &";
-	}
-	cout << ") => (" << debug << ")" <<endl;*/
+	return make_pair(classical,implication);
 }
 
-string hunchClausifier::newName() {
-	string newName = "r" + to_string(renameCounter);
-	renameCounter++;
-	return newName;
-}
-
+/*
+Renames a formula with a particular implication direction, if not already renamed.
+ */
 pair<Formula*,string> hunchClausifier::rename(Fptr formula, Direction dir) {
 	pair<Formula*,string> renamed;
 	auto i = nameMap->find(*formula);
@@ -325,6 +314,9 @@ pair<Formula*,string> hunchClausifier::rename(Fptr formula, Direction dir) {
 	return renamed;
 }
 
+/*
+Given a name pA, formula A and implication directin, returns a formula pA =>/<=/<=> A.
+ */
 Formula* hunchClausifier::createRenamedFormula(string name, Fptr formula, Direction dir) {
 	Formula* renamed;
 	switch (dir) {
@@ -348,6 +340,9 @@ Formula* hunchClausifier::createRenamedFormula(string name, Fptr formula, Direct
 	return renamed;
 }
 
+/*
+Checks whether a formula has already been renamed.
+ */
 string hunchClausifier::checkForName(Formula formula, Direction dir) {
 	auto i = nameMap->find(formula);
 	if (i == nameMap->end()) return "";

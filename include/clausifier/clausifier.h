@@ -7,11 +7,13 @@
 #include <vector>
 #include <queue>
 
+typedef std::pair<std::vector<CClause>,std::vector<IClause>> ClausalForm;
+
 class Clausifier
 {
 
 public:
-	virtual void clausify(Fptr&) = 0;
+	virtual ClausalForm clausify(Fptr&) = 0;
 
 protected:
 	virtual void simplify(Fptr&);

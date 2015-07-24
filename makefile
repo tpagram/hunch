@@ -3,8 +3,8 @@ OBJS = build/hunch.o build/formula.o build/parser.o build/clausifier/hunchClausi
 		 build/clauses/clause.o build/clauses/cclause.o build/clauses/iclause.o
 
 CC = clang++
-CFLAGS = -Wall -c -g -I include -std=c++11 -stdlib=libc++
-LFLAGS = -Wall -g -stdlib=libc++
+CFLAGS = -Wall -O2 -c -g -I include -std=c++11 -stdlib=libc++
+LFLAGS = -Wall -O2 -g -stdlib=libc++
 
 bin/hunch : $(OBJS)
 	@mkdir -p $(dir $@)
