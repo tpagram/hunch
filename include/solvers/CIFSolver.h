@@ -1,12 +1,12 @@
 #ifndef CIF_SOLVER_H
 #define CIF_SOLVER_H
 
-#include "Solver.h"
+#include "solver.h"
 
 class CIFSolver : public Solver
 {
 public:
-	void solve(ClausalForm);
+	bool solve(ClausalForm);
 	
 };
 

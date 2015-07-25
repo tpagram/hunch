@@ -1,10 +1,14 @@
 OBJS = build/hunch.o build/formula.o build/parser.o build/clausifier/hunchClausifier.o \
 		 build/clausifier/clausifierFactory.o build/clausifier/clausifier.o \
-		 build/clauses/clause.o build/clauses/cclause.o build/clauses/iclause.o
+		 build/clauses/clause.o build/clauses/cclause.o build/clauses/iclause.o \
+		 build/solvers/solver.o build/solvers/CIFSolver.o build/solvers/solverFactory.o \
+		 build/structures/mini.o build/structures/structure.o\
 
+LIBS = -Llib -lminisat
+INCLUDES = -Iinclude
 CC = clang++
-CFLAGS = -Wall -O2 -c -g -I include -std=c++11 -stdlib=libc++
-LFLAGS = -Wall -O2 -g -stdlib=libc++
+CFLAGS = -Wall -O2 -c -g -std=c++11 -stdlib=libc++ $(INCLUDES)
+LFLAGS = -Wall -O2 -g -stdlib=libc++ $(LIBS)
 
 bin/hunch : $(OBJS)
 	@mkdir -p $(dir $@)
@@ -54,6 +58,37 @@ build/clauses/cclause.o : src/clauses/cclause.cpp include/clauses/cclause.h incl
 build/clauses/iclause.o : src/clauses/iclause.cpp include/clauses/iclause.h include/clauses/clause.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/clauses/iclause.cpp -o build/clauses/iclause.o
+
+build/solvers/solver.o : 	src/solvers/solver.cpp \
+							include/solvers/solver.h \
+							include/clauses/clause.h \
+							include/structures/structure.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) src/solvers/solver.cpp -o build/solvers/solver.o
+
+build/solvers/CIFSolver.o : src/solvers/CIFsolver.cpp \
+							include/solvers/CIFsolver.h \
+							include/solvers/solver.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) src/solvers/CIFsolver.cpp -o build/solvers/CIFsolver.o
+
+build/solvers/solverFactory.o : src/solvers/solverFactory.cpp \
+								include/solvers/solverFactory.h \
+								include/solvers/solver.h \
+								include/solvers/CIFsolver.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) src/solvers/solverFactory.cpp -o build/solvers/solverFactory.o
+
+build/structures/structure.o : 	src/structures/structure.cpp \
+								include/structures/structure.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) src/structures/structure.cpp -o build/structures/structure.o
+
+build/structures/mini.o : 	src/structures/mini.cpp \
+							include/structures/mini.h \
+							include/structures/structure.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) src/structures/mini.cpp -o build/structures/mini.o
 
 clean:
 	$(RM) -r build bin

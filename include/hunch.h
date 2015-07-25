@@ -8,7 +8,7 @@
 #include "formula.h"
 #include "clausifier/clausifierFactory.h"
 #include "clausifier/clausifier.h"
-#include "minisat/core/solver.h"
-#include "bdd.h"
+#include "solvers/solverFactory.h"
+#include "solvers/CIFSolver.h"
 
 #endif

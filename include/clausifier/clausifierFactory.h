@@ -6,7 +6,7 @@
 #include "clausifier/clausifier.h"
 #include "clausifier/hunchClausifier.h"
 
-class clausifierFactory
+class ClausifierFactory
 {
 
 public:

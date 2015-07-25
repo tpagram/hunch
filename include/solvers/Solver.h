@@ -8,7 +8,7 @@
 class Solver {
 
 public:
-	virtual void solve(ClausalForm) = 0;
+	virtual bool solve(ClausalForm) = 0;
 
 private:
 };

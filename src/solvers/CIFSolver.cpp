@@ -1,5 +1,5 @@
 #include "solvers/CIFSolver.h"
 
-void CIFSolver::solve(ClausalForm) {
-
+bool CIFSolver::solve(ClausalForm) {
+	return true;
 }

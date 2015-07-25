@@ -17,8 +17,13 @@ int main(int argc, char const *argv[]) {
 	Fptr mainFormula = Fptr(parser->parse(input));
 
 	//Clausify formula.
-	unique_ptr<Clausifier> clausifier = clausifierFactory::getClausifier("hunch");
-	clausifier->clausify(mainFormula);
+	unique_ptr<Clausifier> clausifier = ClausifierFactory::getClausifier("hunch");
+	ClausalForm clausalForm = clausifier->clausify(mainFormula);
+
+	//Solver formula.
+	unique_ptr<Solver> solver = SolverFactory::getSolver("CIF");
+	bool isSat = solver->solve(clausalForm);
+	cout << isSat << endl;
 
 	
 }
