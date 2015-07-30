@@ -8,6 +8,7 @@ class Structure {
 public:
 	virtual void addClause(std::vector<int>) = 0;
 	virtual bool isSatisfiable(std::vector<int>) = 0;
+	virtual void simplify() = 0;
 private:
 };
 

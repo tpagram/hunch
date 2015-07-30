@@ -52,3 +52,13 @@ Adds a literal to the right side of the implication.
 void CClause::addRight(string newLit) {
 	clause[1].push_back(newLit);
 }
+
+/*
+Returns a vector of all literals used in the clause.
+ */
+vector<string> CClause::getLiterals() {
+	vector<string> literals;
+	for (string i : clause[0]) literals.push_back(i);
+	for (string i: clause[0]) literals.push_back(i);
+	return literals;
+}

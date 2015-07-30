@@ -5,7 +5,7 @@ using namespace std;
 /*
 Dismantles a formula into a set of clauses ready for solving.
  */
-ClausalForm hunchClausifier::clausify(Fptr& mainFormula) {
+ClausalForm* hunchClausifier::clausify(Fptr& mainFormula) {
 
 	introduceGoal(mainFormula);
 	if (verbose) cout << "goal introduced: " << mainFormula->toString() << endl;
@@ -14,22 +14,12 @@ ClausalForm hunchClausifier::clausify(Fptr& mainFormula) {
 	if (verbose) cout << "simplified: " << mainFormula->toString() << endl;
 
 	std::cout << "Extracting clauses... ";
-	ClausalForm clauses = extractClauses(mainFormula);
+	ClausalForm* clauses = extractClauses(mainFormula);
 	std::cout << "Done!\n";
 
 	cout << "VARIABLES INTRODUCED: " << renameCounter << endl;
-	cout << "CLASSICAL CLAUSES (" << clauses.first.size() << ") :" << endl;
-	if (verbose) {
-		for (CClause i : clauses.first) {
-			cout << i.toString() << endl;
-		}
-	}
-	cout << "IMPLICATION CLAUSES (" << clauses.second.size() << ") :" << endl;
-	if (verbose) {
-		for (IClause i : clauses.second) {
-			cout << i.toString() << endl;
-		}
-	}
+	clauses->printClauses("classical");
+	clauses->printClauses("implication");
 
 	return clauses;
 }
@@ -38,28 +28,27 @@ ClausalForm hunchClausifier::clausify(Fptr& mainFormula) {
 /*
 Extracts classical and implication clauses from formula.
  */
-ClausalForm hunchClausifier::extractClauses(Fptr& mainFormula) {
+ClausalForm* hunchClausifier::extractClauses(Fptr& mainFormula) {
+	ClausalForm *clauseform = new ClausalForm();
 	queue<Fptr> formulae;
 	formulae.push(move(mainFormula));
-	vector<CClause> classical;
-	vector<IClause> implication;
 	while (!formulae.empty()) {
 
 		Fptr currentFormula = move(formulae.front());
 		formulae.pop();
 		if (isClassical(*currentFormula)) {
-			classical.push_back(formulaToClassical(currentFormula));
+			clauseform->addClause(formulaToClassical(currentFormula),"classical");
 			continue;
 		}
 		else if (isImplication(*currentFormula)) {
-			implication.push_back(formulaToImplication(currentFormula));
+			clauseform->addClause(formulaToImplication(currentFormula),"implication");
 			continue;
 		}
 		switch (currentFormula->getOp()) {
 
 			// atom a becomes [] -> [a]
 			case Operator::ATOM:
-				classical.push_back(CClause("",currentFormula->getVar()));
+				clauseform->addClause(new CClause("",currentFormula->getVar()),"classical");
 				break;
 
 			// if a & b, extract clauses from a and b separately.
@@ -71,18 +60,18 @@ ClausalForm hunchClausifier::extractClauses(Fptr& mainFormula) {
 			// a | b | A ... becomes [] -> [a,b,pA ...], adds [pA] -> [B], ...
 			case Operator::OR: {
 				vector<Fptr> orFormulae = extractSubformulae(currentFormula, Operator::OR);
-				CClause clause = CClause("","");
+				CClause *clause = new CClause("","");
 				for (Fptr& f : orFormulae) {
 					if (f->getOp() == Operator::ATOM) {
-						clause.addRight(f->getVar());
+						clause->addRight(f->getVar());
 					}
 					else {
 						pair<Formula*,string> newName = rename(move(f), Direction::implies);
 						if (newName.first != NULL) formulae.push(Fptr(newName.first));
-						clause.addRight(newName.second);
+						clause->addRight(newName.second);
 					}
 				}
-				classical.push_back(clause);
+				clauseform->addClause(clause,"classical");
 				break;
 			}
 
@@ -287,7 +276,7 @@ ClausalForm hunchClausifier::extractClauses(Fptr& mainFormula) {
 				exit(1);
 		}
 	}
-	return make_pair(classical,implication);
+	return clauseform;
 }
 
 /*

@@ -231,7 +231,7 @@ bool Clausifier::isImplication(Formula& formula) {
 /*
 Converts an appropriate formula to a classical clause.
  */
-CClause Clausifier::formulaToClassical(Fptr& formula) {
+CClause* Clausifier::formulaToClassical(Fptr& formula) {
 	if (!isClassical(*formula)) {
 		cerr << "ERROR: formulaToClassical recieved non-classical formula" << endl;
 		exit(1);
@@ -262,13 +262,13 @@ CClause Clausifier::formulaToClassical(Fptr& formula) {
 			rightQueue.pop();
 		}
 	}
-	return CClause(left,right);
+	return new CClause(left,right);
 }
 
 /*
 Converts an appropriate formula to a classical clause.
  */
-IClause Clausifier::formulaToImplication(Fptr& formula) {
+IClause* Clausifier::formulaToImplication(Fptr& formula) {
 	if (!isImplication(*formula)) {
 		cerr << "ERROR: formulaToImplication recieved non-implication formula" << endl;
 		exit(1);
@@ -276,5 +276,5 @@ IClause Clausifier::formulaToImplication(Fptr& formula) {
 	string left = formula->getLeft()->getLeft()->getVar();
 	string mid = formula->getLeft()->getRight()->getVar();
 	string right = formula->getRight()->getVar();
-	return IClause(left,mid,right);
+	return new IClause(left,mid,right);
 }

@@ -6,14 +6,13 @@
 #include "clauses/iclause.h"
 #include <vector>
 #include <queue>
-
-typedef std::pair<std::vector<CClause>,std::vector<IClause>> ClausalForm;
+#include "clauses/clausalForm.h"
 
 class Clausifier
 {
 
 public:
-	virtual ClausalForm clausify(Fptr&) = 0;
+	virtual ClausalForm* clausify(Fptr&) = 0;
 
 protected:
 	virtual void simplify(Fptr&);
@@ -24,8 +23,8 @@ protected:
 	virtual Formula* constructSoleOperatorFormula(std::vector<Fptr>&, Operator);
 	virtual bool isClassical(Formula&);
 	virtual bool isImplication(Formula&);
-	virtual CClause formulaToClassical(Fptr&);
-	virtual IClause formulaToImplication(Fptr&);
+	virtual CClause* formulaToClassical(Fptr&);
+	virtual IClause* formulaToImplication(Fptr&);
 
 };
 

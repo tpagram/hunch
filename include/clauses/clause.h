@@ -9,6 +9,7 @@ class Clause {
 
 public:
 	virtual std::string toString() = 0;
+	virtual std::vector<std::string> getLiterals() = 0;
 };
 
 #endif // CLAUSE_H

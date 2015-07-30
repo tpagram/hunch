@@ -11,6 +11,7 @@ public:
 	virtual std::string toString();
 	void addLeft(std::string);
 	void addRight(std::string);
+	virtual std::vector<std::string> getLiterals();
 private:
 	std::array<std::vector<std::string>,2> clause;
 };

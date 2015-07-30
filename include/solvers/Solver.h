@@ -2,13 +2,14 @@
 #define SOLVER_H
 
 #include "clauses/clause.h"
-#include "clausifier/clausifier.h"
+#include "clauses/clausalForm.h"
 #include "structures/structure.h"
+
 
 class Solver {
 
 public:
-	virtual bool solve(ClausalForm) = 0;
+	virtual bool solve(CFptr&) = 0;
 
 private:
 };

@@ -2,7 +2,8 @@ OBJS = build/hunch.o build/formula.o build/parser.o build/clausifier/hunchClausi
 		 build/clausifier/clausifierFactory.o build/clausifier/clausifier.o \
 		 build/clauses/clause.o build/clauses/cclause.o build/clauses/iclause.o \
 		 build/solvers/solver.o build/solvers/CIFSolver.o build/solvers/solverFactory.o \
-		 build/structures/mini.o build/structures/structure.o\
+		 build/structures/mini.o build/structures/structure.o \
+		 build/clauses/clausalForm.o
 
 LIBS = -Llib -lminisat
 INCLUDES = -Iinclude
@@ -14,16 +15,23 @@ bin/hunch : $(OBJS)
 	@mkdir -p $(dir $@)
 	$(CC) $(LFLAGS) $(OBJS) -o bin/hunch
 
-build/hunch.o : src/hunch.cpp include/hunch.h include/parser.h include/formula.h \
-				include/clausifier/clausifier.h include/clauses/clause.h
+build/hunch.o : src/hunch.cpp \
+				include/hunch.h \
+				include/parser.h \
+				include/formula.h \
+				include/clausifier/clausifier.h \
+				include/clauses/clause.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/hunch.cpp -o build/hunch.o
 
-build/formula.o : src/formula.cpp include/formula.h
+build/formula.o : 	src/formula.cpp \
+					include/formula.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/formula.cpp -o build/formula.o
 
-build/parser.o : src/parser.cpp include/parser.h include/formula.h
+build/parser.o : 	src/parser.cpp \
+					include/parser.h \
+					include/formula.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/parser.cpp -o build/parser.o
 
@@ -47,15 +55,26 @@ build/clausifier/hunchClausifier.o :	src/clausifier/hunchClausifier.cpp \
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/clausifier/hunchClausifier.cpp -o build/clausifier/hunchClausifier.o
 
-build/clauses/clause.o : src/clauses/clause.cpp include/clauses/clause.h
+build/clauses/clausalForm.o : 	src/clauses/clausalform.cpp \
+								include/clauses/clausalform.h \
+								include/clauses/clause.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) src/clauses/clausalForm.cpp -o build/clauses/clausalForm.o
+
+build/clauses/clause.o : 	src/clauses/clause.cpp \
+							include/clauses/clause.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/clauses/clause.cpp -o build/clauses/clause.o
 
-build/clauses/cclause.o : src/clauses/cclause.cpp include/clauses/cclause.h include/clauses/clause.h
+build/clauses/cclause.o : 	src/clauses/cclause.cpp \
+							include/clauses/cclause.h \
+							include/clauses/clause.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/clauses/cclause.cpp -o build/clauses/cclause.o
 
-build/clauses/iclause.o : src/clauses/iclause.cpp include/clauses/iclause.h include/clauses/clause.h
+build/clauses/iclause.o : 	src/clauses/iclause.cpp \
+							include/clauses/iclause.h \
+							include/clauses/clause.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) src/clauses/iclause.cpp -o build/clauses/iclause.o
 
