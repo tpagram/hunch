@@ -2,30 +2,17 @@
 
 using namespace std;
 
+ClausalForm::ClausalForm() {
+}
+
 /*
 Add a clause with a string identifying the type of clause.
  */
 void ClausalForm::addClause(Clause *clause, string type) {
-
-	//Check if literal exists for variable name.
-	//If not, assign literal.
-	for (string lit: clause->getLiterals()) {
-		auto i = literalMap.find(lit);
-		if (i == literalMap.end()) {
-			literalMap[lit] = literalCount;
-			literalCount++;
-		}
-	}
-
-	//Add clause to a vector of clauses of similar type.
+	for (string name : clause->getLiterals()) uniqueNames.insert(name);
 	auto i = clauseMap.find(type);
-	if (i == clauseMap.end()) {
-		clauseMap[type]= vector<Cptr>();
-		clauseMap[type].push_back(Cptr(clause));
-	}
-	else {
-		clauseMap[type].push_back(Cptr(clause));
-	}
+	if (i == clauseMap.end()) clauseMap[type] = vector<Cptr>{Cptr(clause)};
+	else i->second.push_back(Cptr(clause));
 }
 
 /*
@@ -33,6 +20,11 @@ Prints clauses of a certain type.
  */
 void ClausalForm::printClauses(string type) {
 	auto clauseType = clauseMap.find(type);
+	if (clauseType == clauseMap.end()) {
+		cout << type + "clauses (0):" << endl;
+		return;
+	}
+
 	cout << type + "clauses (" << clauseType->second.size() << ") :" << endl;
 	if (verbose) {
 		for (int i = 0; i < clauseType->second.size(); i++) {
@@ -41,9 +33,16 @@ void ClausalForm::printClauses(string type) {
 	}
 }
 
+vector<Cptr>& ClausalForm::getClauses(string type) {
+	auto clauseType = clauseMap.find(type);
+	if (clauseType == clauseMap.end()) return nullclause;
+	else return clauseType->second;
+}
 
 /*
-Returns a string of all clauses contained in specific clause type.
+Returns an unordered set of all names inside the form.
  */
-
+unordered_set<string> ClausalForm::getNames() {
+	return uniqueNames;
+}
 

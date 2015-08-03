@@ -12,6 +12,10 @@ Formula* Parser::parse(string input) {
 	std::cout << "Done!\n";
 	std::cout << "Parsing tokens... ";
 	Formula* mainFormula = parseEquality(*tokens);
+	if (!tokens->empty()) {
+		cerr << "ERROR: parser detected unexpected symbol: " << tokens->front() << endl;
+		exit(1);
+	}
 	std::cout << "Done!\n";
 	return mainFormula;
 }

@@ -24,6 +24,7 @@ private:
 	std::pair<Formula*,std::string> rename(Fptr, Direction);  
 	Formula* createRenamedFormula(std::string, Fptr, Direction);
 	std::string checkForName(Formula,Direction);
+	void removeRedundantImplications(ClausalForm& clausalform);
 };
 
 

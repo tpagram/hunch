@@ -4,17 +4,26 @@
 #include "structure.h"
 #include "third_party/Solver.h"
 #include <memory>
+#include <iostream>
+#include <unordered_map>
 
 class Mini : public Structure
 {
 public:
 	Mini();
-	void addClause(std::vector<int>);
-	bool isSatisfiable(std::vector<int> assumptions);
+	void makeLiterals(std::unordered_set<std::string>);
+	void addClause(StringClause);
+	bool isSatisfiable(StringClause);
 	void simplify();
+	bool isModel(std::string name);
+	std::vector<std::string> getConflicts();
 private:
 	std::unique_ptr<Minisat::Solver> internalSolver;
-	Minisat::vec<Minisat::Lit>* toLitClause(std::vector<int>);
+	std::unordered_map<std::string,Minisat::Lit> nameToLitMap;
+	std::unordered_map<int,std::string> litToNameMap;
+	Minisat::Lit getLit(std::string);
+	std::string getName(Minisat::Lit);
+	Minisat::vec<Minisat::Lit>* toLitClause(StringClause);
 };
 
 

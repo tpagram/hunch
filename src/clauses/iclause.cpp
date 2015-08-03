@@ -26,3 +26,21 @@ vector<string> IClause::getLiterals() {
 	for (int i = 0; i < 3; i++) literals.push_back(clause[i]);
 	return literals;
 }
+
+/*
+Returns the clause in the form of an int vector according to certain mapping
+of literal names to integers.
+ */
+vector<int> IClause::toIntClause(std::unordered_map<std::string, int>& litMap) {
+	vector<int> intClause;
+	for (string i : clause) {
+		intClause.push_back(litMap[i]);
+	}
+	return intClause;
+}
+
+StringClause IClause::toStringClause() {
+	vector<string> positives(3);
+	for (int i = 0; i < 3; i++) positives[i] = clause[i];
+	return make_pair(vector<string>(),positives);
+}

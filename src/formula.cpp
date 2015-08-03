@@ -16,8 +16,8 @@ Formula::Formula(Formula* left, Formula* right, Operator op):
 Create a variable atom.
  */
 Formula::Formula(string var) {
-	left = NULL;
-	right = NULL;
+	left = nullptr;
+	right = nullptr;
 	op = Operator::ATOM;
 	this->var = var;
 }
@@ -26,8 +26,8 @@ Formula::Formula(string var) {
 Create a true or false atom.
  */
 Formula::Formula(Operator op) {
-	left = NULL;
-	right = NULL;
+	left = nullptr;
+	right = nullptr;
 	this->op = op;
 	var.clear();
 }

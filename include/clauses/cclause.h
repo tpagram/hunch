@@ -12,6 +12,8 @@ public:
 	void addLeft(std::string);
 	void addRight(std::string);
 	virtual std::vector<std::string> getLiterals();
+	virtual std::vector<int> toIntClause(std::unordered_map<std::string, int>&);
+	virtual StringClause toStringClause();
 private:
 	std::array<std::vector<std::string>,2> clause;
 };

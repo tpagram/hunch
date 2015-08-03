@@ -9,7 +9,8 @@ class CIFSolver : public Solver
 {
 public:
 	bool solve(CFptr&);
-	
+private:
+	bool introduceImplications(std::vector<Cptr>, StringClause);
 };
 
 #endif // CIF_SOLVER_H

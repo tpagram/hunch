@@ -9,6 +9,8 @@ public:
 	IClause(std::string, std::string, std::string);
 	virtual std::string toString();
 	virtual std::vector<std::string> getLiterals();
+	virtual std::vector<int> toIntClause(std::unordered_map<std::string, int>&);
+	virtual StringClause toStringClause();
 private:
 	std::array<std::string,3> clause;
 };

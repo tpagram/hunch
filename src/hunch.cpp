@@ -15,15 +15,15 @@ int main(int argc, char const *argv[]) {
 	//Parse input to formula.
 	unique_ptr<Parser> parser = unique_ptr<Parser>(new Parser);
 	Fptr mainFormula = Fptr(parser->parse(input));
-
+	
 	//Clausify formula.
 	unique_ptr<Clausifier> clausifier = ClausifierFactory::getClausifier("hunch");
 	CFptr clausalForm = CFptr(clausifier->clausify(mainFormula));
 
 	//Solver formula.
 	unique_ptr<Solver> solver = SolverFactory::getSolver("CIF");
-	bool isSat = solver->solve(clausalForm);
-	cout << isSat << endl;
+	bool isValid = solver->solve(clausalForm);
 
-	
+	if (isValid) cout << "===== VALID =====" << endl;
+	else cout << "===== INVALID =====" << endl;
 }

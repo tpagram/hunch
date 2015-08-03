@@ -13,9 +13,9 @@ ClausalForm* hunchClausifier::clausify(Fptr& mainFormula) {
 	simplify(mainFormula); //todo fix b & (a & b) not simplifying to a & b.
 	if (verbose) cout << "simplified: " << mainFormula->toString() << endl;
 
-	std::cout << "Extracting clauses... ";
+	cout << "Extracting clauses... ";
 	ClausalForm* clauses = extractClauses(mainFormula);
-	std::cout << "Done!\n";
+	cout << "Done!\n";
 
 	cout << "VARIABLES INTRODUCED: " << renameCounter << endl;
 	clauses->printClauses("classical");
@@ -45,7 +45,6 @@ ClausalForm* hunchClausifier::extractClauses(Fptr& mainFormula) {
 			continue;
 		}
 		switch (currentFormula->getOp()) {
-
 			// atom a becomes [] -> [a]
 			case Operator::ATOM:
 				clauseform->addClause(new CClause("",currentFormula->getVar()),"classical");
@@ -250,7 +249,6 @@ ClausalForm* hunchClausifier::extractClauses(Fptr& mainFormula) {
 
 				// (A <=> B) => C) becomes ((A => B) & (B => A)) => C)
 				else if (currentFormula->getLeft()->getOp() == Operator::EQUAL) {
-					cout << "ok\n";
 					Fptr temp = Fptr(new Formula(nullptr, nullptr, Operator::AND));
 					temp->setLeft(Fptr(new Formula(nullptr,nullptr, Operator::IMPLIES)));
 					temp->setRight(Fptr(new Formula(nullptr,nullptr, Operator::IMPLIES)));
@@ -276,6 +274,9 @@ ClausalForm* hunchClausifier::extractClauses(Fptr& mainFormula) {
 				exit(1);
 		}
 	}
+	cout << "test" << endl;
+	removeRedundantImplications(*clauseform);
+	cout << "test" << endl;
 	return clauseform;
 }
 
@@ -339,3 +340,33 @@ string hunchClausifier::checkForName(Formula formula, Direction dir) {
 	else return i->second.first;
 }
 
+/*
+If there are implication clauses of the form (a => b) => c_1 ... (a=>b) => c_n,
+we replace them with (a => b) => p, p => c_1 ... p => c_n
+ */
+void hunchClausifier::removeRedundantImplications(ClausalForm& clausalform) {
+	vector<Cptr>& implications = clausalform.getClauses("implication");
+	vector<Cptr> newImplications;
+	for (int i = 0; i < implications.size(); i++) {
+		vector<string> removed;
+		vector<string> i_lits =implications[i]->getLiterals();
+		for (int j = i+1; j < implications.size(); j++) {
+			vector<string> j_lits =implications[j]->getLiterals();
+			if (i_lits[0] == j_lits[0] && i_lits[1] == j_lits[1]) {
+				removed.push_back(j_lits[2]);
+				implications.erase(implications.begin()+j);
+				j--;
+			}
+		}
+		if (!removed.empty()) {
+			removed.push_back(i_lits[2]);
+			implications.erase(implications.begin()+i);
+			i--;
+			string newName = "r" + to_string(renameCounter);
+			renameCounter++;
+			newImplications.push_back(Cptr(new IClause(i_lits[0],i_lits[1],newName)));
+			for (string oldName : removed) clausalform.addClause(new CClause(newName,oldName),"classical");
+		}
+	}
+	implications.insert(implications.end(),newImplications.begin(),newImplications.end());
+}

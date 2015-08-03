@@ -59,6 +59,25 @@ Returns a vector of all literals used in the clause.
 vector<string> CClause::getLiterals() {
 	vector<string> literals;
 	for (string i : clause[0]) literals.push_back(i);
-	for (string i: clause[0]) literals.push_back(i);
+	for (string i: clause[1]) literals.push_back(i);
 	return literals;
+}
+
+/*
+Returns the clause in the form of an int vector according to certain mapping
+of literal names to integers.
+ */
+vector<int> CClause::toIntClause(std::unordered_map<std::string, int>& litMap) {
+	vector<int> intClause;
+	for (string i : clause[0]) {
+		intClause.push_back(-litMap[i]);
+	}
+	for (string i : clause[1]) {
+		intClause.push_back(litMap[i]);
+	}
+	return intClause;
+}
+
+StringClause CClause::toStringClause() {
+	return make_pair(clause[0],clause[1]);
 }
