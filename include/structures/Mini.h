@@ -10,7 +10,7 @@
 class Mini : public Structure
 {
 public:
-	Mini();
+	Mini(Options options);
 	void makeLiterals(std::unordered_set<std::string>);
 	void addClause(StringClause);
 	bool isSatisfiable(StringClause);

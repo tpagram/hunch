@@ -21,14 +21,14 @@ Prints clauses of a certain type.
 void ClausalForm::printClauses(string type) {
 	auto clauseType = clauseMap.find(type);
 	if (clauseType == clauseMap.end()) {
-		cout << type + "clauses (0):" << endl;
+		cout << "    " << type + " clauses (0):" << endl;
 		return;
 	}
 
-	cout << type + "clauses (" << clauseType->second.size() << ") :" << endl;
+	cout << "    " << type + " clauses (" << clauseType->second.size() << "):" << endl;
 	if (verbose) {
 		for (int i = 0; i < clauseType->second.size(); i++) {
-			cout << clauseType->second.at(i)->toString() << endl;
+			cout << "        (" << i << ") " << clauseType->second.at(i)->toString() << endl;
 		}
 	}
 }

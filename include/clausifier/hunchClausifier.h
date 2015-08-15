@@ -13,12 +13,12 @@ typedef std::unordered_map<Formula,std::pair<std::string,Direction>,Formula::For
 class hunchClausifier : public Clausifier
 {
 public:
+	hunchClausifier(Options options): Clausifier(options) {};
 	virtual ClausalForm* clausify(Fptr&);
 
 private:
 	int renameCounter = 0;
 	std::unique_ptr<FormulaMap> nameMap = std::unique_ptr<FormulaMap>(new FormulaMap());
-	bool verbose = false;
 
 	ClausalForm* extractClauses(Fptr&);
 	std::pair<Formula*,std::string> rename(Fptr, Direction);  

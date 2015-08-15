@@ -9,6 +9,7 @@ struct Options {
     std::string structure;
     int verbosity;
     
+    Options();
     Options(int argc, char **argv);
     void printHelp();
 };

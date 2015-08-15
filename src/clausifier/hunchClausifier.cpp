@@ -7,19 +7,25 @@ Dismantles a formula into a set of clauses ready for solving.
  */
 ClausalForm* hunchClausifier::clausify(Fptr& mainFormula) {
 
+	cout << "Introducing goal... " << flush;
 	introduceGoal(mainFormula);
+	cout << "Done!\n";
 	if (false) cout << "goal introduced: " << mainFormula->toString() << endl;
 
+	cout << "Simplifying formula... " << flush;
 	simplify(mainFormula); //todo fix b & (a & b) not simplifying to a & b.
+	cout << "Done!\n";
 	if (false) cout << "simplified: " << mainFormula->toString() << endl;
 
-	cout << "Extracting clauses... ";
+	cout << "Extracting clauses... " << flush;
 	ClausalForm* clauses = extractClauses(mainFormula);
 	cout << "Done!\n";
 
-	cout << "VARIABLES INTRODUCED: " << renameCounter << endl;
-	clauses->printClauses("classical");
-	clauses->printClauses("implication");
+	if (options.verbosity >= 1) {
+		cout << "    variables introduced: " << renameCounter << endl;
+		clauses->printClauses("classical");
+		clauses->printClauses("implication");
+	}
 
 	return clauses;
 }

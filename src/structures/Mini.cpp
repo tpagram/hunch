@@ -3,22 +3,12 @@
 using namespace std;
 
 
-Mini::Mini() {
+Mini::Mini(Options options) : Structure(options) {
 	internalSolver= unique_ptr<Minisat::Solver>(new Minisat::Solver);
 	Minisat::Lit falseLit = Minisat::mkLit(internalSolver->newVar());
 	nameToLitMap["false"] = falseLit;
 	litToNameMap[toInt(falseLit)] = "false";
 	internalSolver->addClause(~falseLit);
-
-	Minisat::Lit a = Minisat::mkLit(internalSolver->newVar());
-	Minisat::Lit b = Minisat::mkLit(internalSolver->newVar());
-	Minisat::vec<Minisat::Lit> litClause;
-	litClause.push(a);
-	litClause.push(b);
-	internalSolver->addClause(litClause);
-	cout << "test sat = " << internalSolver->solve() << endl;
-	cout << "a = " << (bool) !toInt(internalSolver->modelValue(a)) << endl;
-	cout << "b = " << (bool) !toInt(internalSolver->modelValue(b)) << endl;
 }
 
 /*
@@ -37,8 +27,8 @@ void Mini::makeLiterals(unordered_set<string> uniqueNames) {
 Add clause to the sat solver.
  */
 void Mini::addClause(StringClause clause) {
-	if (true) { //todo verbose
-		cout << "adding clause:";
+	if (options.verbosity >= 2) {
+		cout << "    adding clause:";
 		for (string i : clause.first) cout << " ~" << i;
 		for (string i : clause.second) cout << " " << i;
 		cout << endl;

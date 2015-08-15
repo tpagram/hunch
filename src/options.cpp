@@ -2,6 +2,13 @@
 
 using namespace std;
 
+Options::Options() {
+    clausifier = "hunch";
+    solver = "cif";
+    structure = "minisat";
+    verbosity = 0;
+}
+
 Options::Options(int argc, char **argv) {
     clausifier = "hunch";
     solver = "cif";
@@ -48,9 +55,18 @@ Options::Options(int argc, char **argv) {
 				printHelp();
 			}
 		} 
-		else if (strncmp(argv[i], "-v0", 3) == 0) verbosity = 0;
-		else if (strncmp(argv[i], "-v1", 3) == 0) verbosity = 1;
-		else if (strncmp(argv[i], "-v2", 3) == 0) verbosity = 2;
+		else if (strncmp(argv[i], "-v", 2) == 0) {
+			i++;
+			if (i >= argc || strncmp(argv[i], "-", 1) == 0) {
+				cerr << "ERROR: -v needs argument" << endl;
+				printHelp();
+			}
+			verbosity = atoi(argv[i]);
+			if (verbosity > 3) {
+				cerr << "ERROR: verbosity levels range from 0 to 3. " << endl;
+				printHelp();
+			}
+		} 
 		else {
 			cerr << "ERROR: Unknown option: " << argv[i] << endl;
             printHelp();

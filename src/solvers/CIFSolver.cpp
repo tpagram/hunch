@@ -8,9 +8,12 @@ and implication clauses of the form (a => b) => c are valid or not.
  */
 bool CIFSolver::solve(CFptr& clausalform) {
 
+	cout << "Solving formula... " << flush;
+	if (options.verbosity > 0) cout << endl;
+
 	//todo factory
 	//Initialise internal solver.
-	internalSolver = unique_ptr<Structure>(new Mini());
+	internalSolver = unique_ptr<Structure>(new Mini(options));
 
 	//Add literals to solver.
 	internalSolver->makeLiterals(clausalform->getNames());
@@ -29,6 +32,7 @@ bool CIFSolver::solve(CFptr& clausalform) {
 	vector<Cptr> imps = implication;
 	bool isValid = introduceImplications(imps,make_pair(unordered_set<string> {"#goal"}, unordered_set<string>()));
 	
+	cout << "Done!\n";
 	return isValid;
 
 }
@@ -36,20 +40,22 @@ bool CIFSolver::solve(CFptr& clausalform) {
 bool CIFSolver::introduceImplications(vector<Cptr> implications, StringClause assumptions) {
 
 	//Is the solver currently unsatisfiable? If so, we know validity.
-	if (true) { //todo verbose
-		cout << "testing satisfiability with assumptions:";
+	if (options.verbosity >= 2) { //todo verbose
+		cout << "    testing satisfiability with assumptions:";
 		for (string i : assumptions.first) cout << " ~" << i;
 		for (string i : assumptions.second) cout << " " << i;
 		cout << endl;
 	}
 	bool isSat = internalSolver->isSatisfiable(assumptions);
-	if (isSat) cout << "initial sat" << endl;
-	else cout << "initial unsat" << endl;
+	if (options.verbosity >= 2) {
+		if (isSat) cout << "    initial sat" << endl;
+		else cout << "    initial unsat" << endl;
+	}
 	if (!isSat) return true;
 
 	unordered_set<string> truths = internalSolver->getTruths();
-	if (true) { //todo verbose
-		cout << "truths = ";
+	if (options.verbosity >= 2) {
+		cout << "    truths = ";
 		for (string i : truths) cout << i << ", ";
 		cout << endl;
 	}
@@ -60,8 +66,8 @@ bool CIFSolver::introduceImplications(vector<Cptr> implications, StringClause as
 			triggeredImplications.push_back(i);
 		}
 	}
-	if (true) { //todo verbose
-		cout << "triggeredImplications = ";
+	if (options.verbosity >= 2) {
+		cout << "    triggeredImplications = ";
 		for (Cptr i : triggeredImplications) cout << i->toString() << ", ";
 		cout << endl;
 	}

@@ -7,10 +7,10 @@ Creates a Formula parsing an input string.
 Uses a recursive descent parser.
 */
 Formula* Parser::parse(string input) {
-	std::cout << "Tokenising input... ";
+	std::cout << "Tokenising input... " << flush;
 	unique_ptr<queue<string>> tokens = unique_ptr<queue<string>>(tokenise(input));
 	std::cout << "Done!\n";
-	std::cout << "Parsing tokens... ";
+	std::cout << "Parsing tokens... " << flush;
 	Formula* mainFormula = parseEquality(*tokens);
 	if (!tokens->empty()) {
 		cerr << "ERROR: parser detected unexpected symbol: " << tokens->front() << endl;
