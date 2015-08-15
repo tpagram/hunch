@@ -9,6 +9,16 @@ Mini::Mini() {
 	nameToLitMap["false"] = falseLit;
 	litToNameMap[toInt(falseLit)] = "false";
 	internalSolver->addClause(~falseLit);
+
+	Minisat::Lit a = Minisat::mkLit(internalSolver->newVar());
+	Minisat::Lit b = Minisat::mkLit(internalSolver->newVar());
+	Minisat::vec<Minisat::Lit> litClause;
+	litClause.push(a);
+	litClause.push(b);
+	internalSolver->addClause(litClause);
+	cout << "test sat = " << internalSolver->solve() << endl;
+	cout << "a = " << (bool) !toInt(internalSolver->modelValue(a)) << endl;
+	cout << "b = " << (bool) !toInt(internalSolver->modelValue(b)) << endl;
 }
 
 /*
@@ -71,10 +81,21 @@ bool Mini::isModel(string name) {
 	return temp;
 }
 
-vector<string> Mini::getConflicts() {
-	vector<string> conflictingLits;
+/*
+Returns all proven literals in the last solve call.
+ */
+unordered_set<string> Mini::getTruths() {
+	unordered_set<string> truths;
+	for (auto i : nameToLitMap) {
+		if (isModel(i.first)) truths.insert(i.first);
+	}
+	return truths;
+}
+
+unordered_set<string> Mini::getConflicts() {
+	unordered_set<string> conflictingLits;
 	for (int i = 0; i < internalSolver->conflict.size(); i++) {
-		conflictingLits.push_back(getName(internalSolver->conflict[i]));
+		conflictingLits.insert(getName(internalSolver->conflict[i]));
 	}
 	return conflictingLits;
 }
@@ -89,7 +110,9 @@ Minisat::Lit Mini::getLit(string name) {
 }
 
 string Mini::getName(Minisat::Lit lit) {
-	auto j = litToNameMap.find(toInt(lit));
+	int litID = toInt(lit);
+	if (litID % 2) litID--;
+	auto j = litToNameMap.find(litID);
 	if (j == litToNameMap.end()) {
 		cerr << "Asked for name of unknown literal: " << toInt(lit) << endl;
 		exit(1);

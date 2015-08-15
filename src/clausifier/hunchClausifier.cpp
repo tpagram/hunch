@@ -8,10 +8,10 @@ Dismantles a formula into a set of clauses ready for solving.
 ClausalForm* hunchClausifier::clausify(Fptr& mainFormula) {
 
 	introduceGoal(mainFormula);
-	if (verbose) cout << "goal introduced: " << mainFormula->toString() << endl;
+	if (false) cout << "goal introduced: " << mainFormula->toString() << endl;
 
 	simplify(mainFormula); //todo fix b & (a & b) not simplifying to a & b.
-	if (verbose) cout << "simplified: " << mainFormula->toString() << endl;
+	if (false) cout << "simplified: " << mainFormula->toString() << endl;
 
 	cout << "Extracting clauses... ";
 	ClausalForm* clauses = extractClauses(mainFormula);
@@ -269,14 +269,14 @@ ClausalForm* hunchClausifier::extractClauses(Fptr& mainFormula) {
 				break;
 
 			case Operator::FALSE: 
+				clauseform->addClause(new CClause(vector<string>(),vector<string>()),"classical");
 			case Operator::TRUE:
-				cerr << "ERROR: Unexpected operator in extractClauses." << endl;
-				exit(1);
+				continue;
+				//cerr << "ERROR: Unexpected boolean in extractClauses." << endl;
+				//exit(1);
 		}
 	}
-	cout << "test" << endl;
 	removeRedundantImplications(*clauseform);
-	cout << "test" << endl;
 	return clauseform;
 }
 

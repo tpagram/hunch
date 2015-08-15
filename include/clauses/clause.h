@@ -5,8 +5,9 @@
 #include <array>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
-typedef std::pair<std::vector<std::string>,std::vector<std::string>> StringClause;
+typedef std::pair<std::unordered_set<std::string>,std::unordered_set<std::string>> StringClause;
 
 class Clause {
 

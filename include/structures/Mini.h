@@ -16,7 +16,8 @@ public:
 	bool isSatisfiable(StringClause);
 	void simplify();
 	bool isModel(std::string name);
-	std::vector<std::string> getConflicts();
+	std::unordered_set<std::string> getTruths();
+	std::unordered_set<std::string> getConflicts();
 private:
 	std::unique_ptr<Minisat::Solver> internalSolver;
 	std::unordered_map<std::string,Minisat::Lit> nameToLitMap;

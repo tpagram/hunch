@@ -23,11 +23,11 @@ bool CIFSolver::solve(CFptr& clausalform) {
 	vector<Cptr>& implication = clausalform->getClauses("implication");
 	for (const Cptr& clause : implication) {
 		vector<string> lits = clause->getLiterals();
-		internalSolver->addClause(make_pair(vector<string>{lits[1]},vector<string>{lits[2]}));
+		internalSolver->addClause(make_pair(unordered_set<string>{lits[1]},unordered_set<string>{lits[2]}));
 	}
 	
 	vector<Cptr> imps = implication;
-	bool isValid = introduceImplications(imps,make_pair(vector<string> {"#goal"}, vector<string>()));
+	bool isValid = introduceImplications(imps,make_pair(unordered_set<string> {"#goal"}, unordered_set<string>()));
 	
 	return isValid;
 
@@ -47,13 +47,16 @@ bool CIFSolver::introduceImplications(vector<Cptr> implications, StringClause as
 	else cout << "initial unsat" << endl;
 	if (!isSat) return true;
 
-	//
+	unordered_set<string> truths = internalSolver->getTruths();
+	if (true) { //todo verbose
+		cout << "truths = ";
+		for (string i : truths) cout << i << ", ";
+		cout << endl;
+	}
 	vector<Cptr> triggeredImplications;
 	for (Cptr i : implications) {
 		vector<string> lits = i->getLiterals();
-		if (!internalSolver->isModel(lits[0]) &&
-				!internalSolver->isModel(lits[1]) &&
-				!internalSolver->isModel(lits[2])) {
+		if (!truths.count(lits[0]) && !truths.count(lits[2])) {
 			triggeredImplications.push_back(i);
 		}
 	}
@@ -66,17 +69,19 @@ bool CIFSolver::introduceImplications(vector<Cptr> implications, StringClause as
 	bool addedClause = false;
 	for (int i = 0; i < triggeredImplications.size(); i++) {
 		vector<string> lits = triggeredImplications[i]->getLiterals();
-		StringClause assum = make_pair(vector<string> {lits[1]}, vector<string> {lits[0]});
-		assum.second.insert(assum.second.end(),assumptions.second.begin(),assumptions.second.end());
+		StringClause assum = make_pair(unordered_set<string> {lits[1]}, unordered_set<string> {lits[0]});
+		assum.second.insert(assumptions.second.begin(),assumptions.second.end());
+		assum.second.insert(truths.begin(),truths.end()); 
 		vector<Cptr> otherImplications = triggeredImplications;
 		otherImplications.erase(otherImplications.begin()+i);
 		if (introduceImplications(otherImplications,assum)) {
-			vector<string> assumedTruths = assum.second;
-			assumedTruths.erase(remove(assumedTruths.begin(), assumedTruths.end(), lits[0]), assumedTruths.end() );
-			assumedTruths.erase(remove(assumedTruths.begin(), assumedTruths.end(), lits[1]), assumedTruths.end() );
-			StringClause newClause = make_pair(assumedTruths,vector<string>{lits[2]});
+			unordered_set<string> conflictingAssumptions = internalSolver->getConflicts();
+			conflictingAssumptions.erase(lits[0]);
+			conflictingAssumptions.erase(lits[1]);
+			StringClause newClause = make_pair(conflictingAssumptions,unordered_set<string>{lits[2]});
 			internalSolver->addClause(newClause);
 			addedClause = true;
+			break;
 		}
 
 	}

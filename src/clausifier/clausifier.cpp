@@ -90,6 +90,7 @@ void Clausifier::simplify(Fptr& formula) {
 			formula->setOp(Operator::IMPLIES);
 		}
 	}
+
 	return;
 }
 

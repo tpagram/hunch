@@ -40,7 +40,5 @@ vector<int> IClause::toIntClause(std::unordered_map<std::string, int>& litMap) {
 }
 
 StringClause IClause::toStringClause() {
-	vector<string> positives(3);
-	for (int i = 0; i < 3; i++) positives[i] = clause[i];
-	return make_pair(vector<string>(),positives);
+	return make_pair(unordered_set<string>(),unordered_set<string>());
 }

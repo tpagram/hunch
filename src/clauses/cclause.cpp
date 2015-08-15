@@ -30,10 +30,11 @@ string CClause::toString() {
 	if (str.back() == ' ') str.erase(str.end()-2, str.end());
 	str += "]";	
 	return str;*/
+	if (clause[0].size() == 0 && clause[1].size() == 0) return "false";
 	string str;
 	for (string i : clause[0]) str += i + " & ";
 	if (str.back() == ' ') str.erase(str.end()-2, str.end());
-	if (clause[0].size() > 0 && clause[1].size() > 0) str += " => ";
+	str += " => ";
 	for (string i : clause[1]) str += i + " | ";
 	if (str.back() == ' ') str.erase(str.end()-2, str.end());	
 	return str;
@@ -79,5 +80,6 @@ vector<int> CClause::toIntClause(std::unordered_map<std::string, int>& litMap) {
 }
 
 StringClause CClause::toStringClause() {
-	return make_pair(clause[0],clause[1]);
+	return make_pair(unordered_set<string>(clause[0].begin(),clause[0].end()),
+						unordered_set<string>(clause[1].begin(),clause[1].end()));
 }

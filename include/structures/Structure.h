@@ -13,7 +13,8 @@ public:
 	virtual bool isSatisfiable(StringClause) = 0;
 	virtual void simplify() = 0;
 	virtual bool isModel(std::string name) = 0;
-	virtual std::vector<std::string> getConflicts() = 0;
+	virtual std::unordered_set<std::string> getTruths() = 0;
+	virtual std::unordered_set<std::string> getConflicts() = 0;
 private:
 };
 

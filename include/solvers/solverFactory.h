@@ -4,11 +4,12 @@
 #include <memory>
 #include "solver.h"
 #include "CIFSolver.h"
+#include "options.h"
 
 class SolverFactory
 {
 public:
-		static std::unique_ptr<Solver> getSolver(std::string);
+		static std::unique_ptr<Solver> getSolver(Options options);
 };
 
 #endif // SOLVER_FACTORY_H
